@@ -12,7 +12,7 @@ type RPMBuilder struct {
 	PackageBuilder
 }
 
-func (rpm RPMBuilder) RPMMetaData(meta *pkg.PackageMeta) rpmpack.RPMMetaData {
+func (rpm RPMBuilder) Metadata(meta *pkg.PackageMeta) rpmpack.RPMMetaData {
 	return rpmpack.RPMMetaData{
 		Name:        meta.Name,
 		Summary:     meta.Summary,
@@ -39,6 +39,48 @@ func (rpm RPMBuilder) RPMMetaData(meta *pkg.PackageMeta) rpmpack.RPMMetaData {
 	}
 }
 
+func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFile {
+	fileType := rpmpack.GenericFile
+
+	// string to type
+	switch typeName {
+	case "config":
+		fileType = rpmpack.ConfigFile
+	case "doc":
+		fileType = rpmpack.DocFile
+	case "not_use":
+		fileType = rpmpack.DoNotUseFile
+	case "missing_ok":
+		fileType = rpmpack.MissingOkFile
+	case "no_replace":
+		fileType = rpmpack.NoReplaceFile
+	case "spec":
+		fileType = rpmpack.SpecFile
+	case "ghost":
+		fileType = rpmpack.GhostFile
+	case "license":
+		fileType = rpmpack.LicenceFile
+	case "readme":
+		fileType = rpmpack.ReadmeFile
+	case "exclude":
+		fileType = rpmpack.ExcludeFile
+	default:
+		fileType = rpmpack.GenericFile
+	}
+
+	mode, mtime := fileStat(info.Src, info.Mode, info.MTime)
+
+	return rpmpack.RPMFile{
+		Name:  info.Dest,
+		Body:  loadFile(info.Src, info.Body),
+		Mode:  mode,
+		Owner: info.Owner,
+		Group: info.Group,
+		MTime: uint32(mtime.Unix()),
+		Type:  fileType,
+	}
+}
+
 func (rpm RPMBuilder) Filename(meta *pkg.PackageMeta) (string, error) {
 	if meta.Name == "" {
 		return "", errors.New("undefined package name")
@@ -62,7 +104,7 @@ func (rpm RPMBuilder) Filename(meta *pkg.PackageMeta) (string, error) {
 	), nil
 }
 
-func (rpm RPMBuilder) Build(meta *pkg.PackageMeta) error {
+func (rpm RPMBuilder) Build(_ *pkg.Package) error {
 	// TODO Implementing here
 	return errors.New("build function not yet implemented")
 }

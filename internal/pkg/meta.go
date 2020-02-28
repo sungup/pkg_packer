@@ -1,10 +1,10 @@
 package pkg
 
 type PackageMeta struct {
-	Name    string `yaml:"name"`
-	Version string `yaml:"version"`
-	Release string `yaml:"release"`
-	Arch    string `yaml:"arch"`
+	Name    string `yaml:"name,omitempty"`
+	Version string `yaml:"version,omitempty"`
+	Release string `yaml:"release,omitempty"`
+	Arch    string `yaml:"arch,omitempty"`
 
 	Summary     string `yaml:"summary"`
 	Description string `yaml:"desc"`

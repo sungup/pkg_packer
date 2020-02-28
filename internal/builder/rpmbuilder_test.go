@@ -1,12 +1,12 @@
 package builder
 
 import (
-	Assert "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestRPMBuilder_Filename(t *testing.T) {
-	assert := Assert.New(t)
+	a := assert.New(t)
 
 	expected, tested := LoadYAMLExpectAndPackage()
 
@@ -17,8 +17,8 @@ func TestRPMBuilder_Filename(t *testing.T) {
 
 	// Normal test
 	data, err = builder.Filename(&tested.Meta)
-	if assert.NoError(err) {
-		assert.Equal(expected.Test["rpmfile"], data)
+	if a.NoError(err) {
+		a.Equal(expected.Test["rpmfile"], data)
 	}
 
 	// Name check test
@@ -26,7 +26,7 @@ func TestRPMBuilder_Filename(t *testing.T) {
 	tested.Meta.Name = ""
 	// TODO add error type check
 	_, err = builder.Filename(&tested.Meta)
-	assert.Error(err)
+	a.Error(err)
 	tested.Meta.Name = data
 
 	// Version check test
@@ -34,7 +34,7 @@ func TestRPMBuilder_Filename(t *testing.T) {
 	tested.Meta.Version = ""
 	// TODO add error type check
 	_, err = builder.Filename(&tested.Meta)
-	assert.Error(err)
+	a.Error(err)
 	tested.Meta.Version = data
 
 }

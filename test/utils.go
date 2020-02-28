@@ -1,12 +1,15 @@
 package test
 
 import (
+	"crypto/rand"
 	"errors"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
+	"testing"
 )
 
 const (
@@ -16,6 +19,16 @@ const (
 type YAMLTestData struct {
 	Meta map[string]string `yaml:"meta"`
 	Test map[string]string `yaml:"test"`
+}
+
+func RandString(t *testing.T) []byte {
+	a := assert.New(t)
+
+	defaults := make([]byte, 16)
+	_, err := rand.Read(defaults)
+	a.NoError(err)
+
+	return defaults
 }
 
 func GetTestFilePath(filepath string) (string, error) {
