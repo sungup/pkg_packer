@@ -4,7 +4,6 @@ env:
   GO111MODULE: "off"
   GOOS: "linux"
   GOARCH: "amd64"
-  GOFLAGS: -extldflags '-static'
   REPO_NAME: github.com/${{ github.repository }}
   PKG_PACKER_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer
   PKG_PACKER_SOURCE: pkg_packer/cmd/pkg_packer
@@ -44,4 +43,4 @@ jobs:
 
       - name: Build-amd64
         run: |
-          go build -v -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
+          go build -v -ldflags "-extldflags '-static'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
