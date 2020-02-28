@@ -1,6 +1,6 @@
 # Raspberry Pi Prometheus Exporter
 
-![Go](https://github.com/Sungup/raspi_exporter/workflows/Go/badge.svg)
+![Go](https://github.com/Sungup/pkg_packer/workflows/Go/badge.svg)
 
 ## Documents
 
