@@ -29,8 +29,6 @@ jobs:
 
       - name: Setup GO build environment
         run: |
-          echo mkdir -p $(dirname ${GOPATH}/src/${REPO_NAME})
-          echo ln -svf ${{ github.workspace }} ${GOPATH}/src/${REPO_NAME}
           mkdir -p $(dirname ${GOPATH}/src/${REPO_NAME})
           ln -svf ${{ github.workspace }} ${GOPATH}/src/${REPO_NAME}
 
