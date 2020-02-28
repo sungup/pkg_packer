@@ -1,0 +1,15 @@
+meta:
+  name: meta-test
+  version: 0.0.0-1
+  release: el7
+  arch: x86_64
+  summary: |-
+    summary info
+  desc: |-
+    very
+    very
+    long description
+
+# Following block is used for the testing
+test:
+  rpmfile: meta-test-0.0.0-1.el7.x86_64.rpm

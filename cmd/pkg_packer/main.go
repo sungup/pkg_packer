@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/rpmpack"
+	"github.com/sungup/pkg_packer/internal/pkg"
+	"github.com/sungup/pkg_packer/internal/pkg/builder"
 	"log"
 	"os"
-	"time"
+	"path"
 )
 
 func toRPMFileName(meta rpmpack.RPMMetaData) (string, error) {
@@ -38,32 +40,22 @@ func toRPMFileName(meta rpmpack.RPMMetaData) (string, error) {
 }
 
 func main() {
-	r, err := rpmpack.NewRPM(
-		rpmpack.RPMMetaData{
-			Name:        "rpmpack-test",
-			Summary:     "",
-			Description: "",
-			Version:     "0.0.1-1",
-			Release:     "el7",
-			Arch:        "x86_64",
-			OS:          "linux",
-			Vendor:      "",
-			URL:         "",
-			Packager:    "",
-			Group:       "",
-			Licence:     "",
-			BuildHost:   "",
-			Compressor:  "",
-			Epoch:       0,
-			BuildTime:   time.Time{},
-			Provides:    nil,
-			Obsoletes:   nil,
-			Suggests:    nil,
-			Recommends:  nil,
-			Requires:    nil,
-			Conflicts:   nil,
-		},
-	)
+	meta := pkg.PackageMeta{
+		Name:        "rpmpack-test",
+		Version:     "0.0.1-1",
+		Release:     "el7",
+		Arch:        "x86_64",
+		Summary:     "",
+		Description: "",
+		OS:          "linux",
+		Vendor:      "",
+		URL:         "",
+		License:     "",
+	}
+
+	rBuild := builder.RPMBuilder{}
+
+	r, err := rpmpack.NewRPM(rBuild.RPMMetaData(&meta))
 
 	if err != nil {
 		panic(err)
@@ -80,7 +72,7 @@ func main() {
 
 	filename, _ := toRPMFileName(r.RPMMetaData)
 
-	fRpm, _ := os.Create(filename)
+	fRpm, _ := os.Create(path.Join("temp", filename))
 	defer func() { _ = fRpm.Close() }()
 
 	rpmWriter := bufio.NewWriter(fRpm)
@@ -88,4 +80,6 @@ func main() {
 	if err := r.Write(rpmWriter); err != nil {
 		log.Fatalf("write failed: %v", err)
 	}
+
+	_ = rpmWriter.Flush()
 }
