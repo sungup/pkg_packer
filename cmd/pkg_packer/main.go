@@ -34,7 +34,7 @@ func main() {
 
 	r.AddFile(rBuild.File("not_use", &pkg.PackageFile{
 		Dest:  "/tmp/rpmpack_test.log",
-		Body:  []byte("Hello World\n"),
+		Body:  "Hello World\n",
 		Mode:  0644,
 		Owner: "root",
 		Group: "root",

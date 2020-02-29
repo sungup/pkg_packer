@@ -68,15 +68,13 @@ func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFi
 		fileType = rpmpack.GenericFile
 	}
 
-	mode, mtime := fileStat(info.Src, info.Mode, info.MTime)
-
 	return rpmpack.RPMFile{
 		Name:  info.Dest,
-		Body:  loadFile(info.Src, info.Body),
-		Mode:  mode,
+		Body:  info.FileData(),
+		Mode:  info.FileMode(),
 		Owner: info.Owner,
 		Group: info.Group,
-		MTime: uint32(mtime.Unix()),
+		MTime: uint32(info.FileMTime().Unix()),
 		Type:  fileType,
 	}
 }

@@ -10,10 +10,20 @@ import (
 	"path"
 	"runtime"
 	"testing"
+	"time"
 )
 
 const (
-	ExpectFile = "test.yml"
+	ExpectFile     = "test.yml"
+	ExpectFileMode = uint(0644)
+)
+
+var (
+	ExpectFileDate = time.Date(
+		2020, 02, 29,
+		01, 19, 47, 843167765,
+		time.UTC,
+	).Unix()
 )
 
 type YAMLTestData struct {

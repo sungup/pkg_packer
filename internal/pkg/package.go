@@ -6,7 +6,10 @@ import (
 )
 
 type Package struct {
-	Meta PackageMeta `yaml:"meta,flow"`
+	Meta PackageMeta `yaml:"meta"`
+
+	Dirs  []PackageDir             `yaml:"directory"`
+	Files map[string][]PackageFile `yaml:"files"`
 }
 
 func LoadPkgInfo(filepath string) (*Package, error) {
