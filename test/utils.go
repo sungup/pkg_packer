@@ -25,7 +25,7 @@ const (
 var (
 	ExpectFileDate = time.Date(
 		2020, 03, 01,
-		02, 37, 51, 970273082,
+		05, 12, 36, 926074319,
 		time.UTC,
 	)
 
@@ -74,7 +74,7 @@ func GetTestFilePath(filepath string) (string, error) {
 	testPath := path.Join(path.Dir(thisFilePath), filepath)
 
 	if _, err := os.Stat(testPath); os.IsNotExist(err) {
-		return "", errors.New("test file doesn't exist")
+		return testPath, errors.New("test file doesn't exist")
 	} else {
 		return testPath, nil
 	}

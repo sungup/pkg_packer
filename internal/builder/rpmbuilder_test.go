@@ -1,12 +1,10 @@
 package builder
 
 import (
-	"bufio"
 	"bytes"
 	"github.com/stretchr/testify/assert"
 	"github.com/sungup/pkg_packer/test"
 	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -70,13 +68,13 @@ func TestRPMBuilder_Build(t *testing.T) {
 	// 3. check output
 	a.Equal(expectedData, buffer.Bytes())
 
-	////////
-	filePath, _ := builder.Filename()
-	filePath, _ = test.GetTestFilePath(filePath)
-
-	rpmFile, _ := os.Create(filePath)
-	rpmWriter := bufio.NewWriter(rpmFile)
-
-	_ = builder.Build(rpmWriter)
-	_ = rpmWriter.Flush()
+	//////// rpm builder for renewed test.yml file
+	// filePath, _ := builder.Filename()
+	// filePath, _ = test.GetTestFilePath(filePath)
+	//
+	// rpmFile, _ := os.Create(filePath)
+	// rpmWriter := bufio.NewWriter(rpmFile)
+	//
+	// _ = builder.Build(rpmWriter)
+	// _ = rpmWriter.Flush()
 }
