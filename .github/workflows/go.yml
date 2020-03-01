@@ -56,3 +56,5 @@ jobs:
       - name: Build-amd64
         run: |
           go build -v -ldflags "-extldflags '-static'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
+
+          ${PKG_PACKER_TARGET} -source build -yaml build/pkg-packer/pkg-packer-el7.yml

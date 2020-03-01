@@ -1,0 +1,17 @@
+meta:
+  name: pkg-packer
+  version: 0.0.1
+  release: el7
+  arch: x86_64
+  summary: pkg-packer build tool
+  desc: |-
+    pkg-packer simple package build tool.
+
+    currently support only RPM build
+
+files:
+  generic:
+    - dest: /usr/bin/pkg-packer
+      source: amd64/pkg-packer
+      owner: root
+      group: root
