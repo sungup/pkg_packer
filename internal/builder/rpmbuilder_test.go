@@ -11,7 +11,7 @@ import (
 func TestRPMBuilder_Filename(t *testing.T) {
 	a := assert.New(t)
 
-	expected, tested := LoadYAMLExpectAndPackage()
+	expected, tested := loadYAMLExpectAndPackage()
 
 	builder := NewRPMBuilder(tested)
 
@@ -45,7 +45,7 @@ func TestRPMBuilder_Build(t *testing.T) {
 	var err error
 
 	a := assert.New(t)
-	expected, tested := LoadYAMLExpectAndPackage()
+	expected, tested := loadYAMLExpectAndPackage()
 
 	// 0. Sync the rpm file's build time
 	tested.Meta.UpdateBuildTime(test.ExpectFileDate.UTC())

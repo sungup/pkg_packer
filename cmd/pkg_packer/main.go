@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"github.com/sungup/pkg_packer/internal/builder"
 	"github.com/sungup/pkg_packer/internal/pkg"
 	"log"
@@ -9,66 +10,58 @@ import (
 	"path"
 )
 
+type PkgPackerArgs struct {
+	srcDir   string
+	yamlPath string
+	yamlHome string
+}
+
+func argParse() PkgPackerArgs {
+	args := PkgPackerArgs{}
+
+	flag.StringVar(&args.srcDir, "source", ".", "package source directory")
+	flag.StringVar(&args.yamlPath, "yaml", "recipe.yml", "packaging recipe file")
+
+	flag.Parse()
+
+	args.yamlHome = path.Dir(args.yamlPath)
+
+	return args
+}
+
 func main() {
-	pkgInfo := pkg.NewPackage(pkg.PackageMeta{
-		Name:        "rpmpack-test",
-		Version:     "0.0.1-1",
-		Release:     "el7",
-		Arch:        "x86_64",
-		Summary:     "",
-		Description: "",
-		OS:          "linux",
-		Vendor:      "",
-		URL:         "",
-		License:     "",
-	})
+	args := argParse()
 
-	pkgInfo.Files["not_use"] = append(
-		pkgInfo.Files["not_use"],
-		pkg.PackageFile{
-			Dest:  "/tmp/rpmpack_test.log",
-			Body:  "Hello World\n",
-			Mode:  0644,
-			Owner: "root",
-			Group: "root",
-		},
-	)
+	// 1. load yaml file
+	pkgInfo, err := pkg.LoadPkgInfo(args.yamlPath, args.srcDir)
 
-	pkgInfo.Files["generic"] = append(
-		pkgInfo.Files["not_use"],
-		pkg.PackageFile{
-			Dest:  "/tmp/test.yml",
-			Src:   "test/test.yml",
-			Owner: "root",
-			Group: "root",
-		},
-	)
-
-	rBuild := builder.NewRPMBuilder(pkgInfo)
-
-	var rpmPath string
-	var err error
-	if rpmPath, err = rBuild.Filename(); err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	rpmPath = path.Join("temp", rpmPath)
+	pkgBuilder := builder.NewRPMBuilder(pkgInfo)
 
-	// 4. create file
+	// 2. open rpm file to store
 	var rpmFile *os.File
-	if rpmFile, err = os.Create(rpmPath); err != nil {
+	if rpmPath, err := pkgBuilder.Filename(); err == nil {
+		rpmPath = path.Join(args.yamlHome, rpmPath)
+
+		if rpmFile, err = os.Create(rpmPath); err != nil {
+			log.Fatal(err)
+		}
+	} else {
 		log.Fatal(err)
 	}
 	defer func() { _ = rpmFile.Close() }()
 
-	// 5. Write and flush file
+	// 3. write and flush
 	rpmWriter := bufio.NewWriter(rpmFile)
 
-	if err = rBuild.Build(rpmWriter); err != nil {
+	if err := pkgBuilder.Build(rpmWriter); err != nil {
 		log.Fatal(err)
 	}
 
-	if err = rpmWriter.Flush(); err != nil {
+	if err := rpmWriter.Flush(); err != nil {
 		log.Fatal(err)
 	}
 }

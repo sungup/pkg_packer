@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	ExpectFile     = "test.yml"
+	ExpectFile1    = "test.yml"
+	ExpectFile2    = "test-with-filepath.yml"
 	ExpectFileMode = uint(0644)
 
 	randStrMin = 5
@@ -68,10 +69,18 @@ func RandStrings(t *testing.T) []string {
 	return buffer
 }
 
-func GetTestFilePath(filepath string) (string, error) {
+func GetTestFileHome() string {
 	_, thisFilePath, _, _ := runtime.Caller(0)
 
-	testPath := path.Join(path.Dir(thisFilePath), filepath)
+	return path.Dir(thisFilePath)
+}
+
+func GetProjectFileHome() string {
+	return path.Dir(GetTestFileHome())
+}
+
+func GetTestFilePath(filepath string) (string, error) {
+	testPath := path.Join(GetTestFileHome(), filepath)
 
 	if _, err := os.Stat(testPath); os.IsNotExist(err) {
 		return testPath, errors.New("test file doesn't exist")
