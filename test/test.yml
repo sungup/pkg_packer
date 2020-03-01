@@ -1,0 +1,39 @@
+meta:
+  name: pkg-packer-rpm-test
+  version: 0.0.0-1
+  release: el7
+  arch: x86_64
+  summary: |-
+    summary info
+  desc: |-
+    very
+    very
+    long description
+directory:
+  - dest: /var/lib/pkg-packer-test
+    mode: 0755
+    owner: root
+    group: root
+files:
+  generic:
+    - dest: /var/lib/pkg-packer-test/helloworld
+      body: |-
+        #!/bin/bash
+        echo "Hello World!"
+        echo "This is the test script dummy"
+      mode: 0644
+      owner: root
+      group: root
+      mtime: 2020-02-29 10:08:17
+prein:
+  - echo Hello World!;
+postin:
+  - echo See you later World!;
+preun:
+  - echo Hello World again!;
+postun:
+  - echo Bye World.
+  - echo Bless your future;
+# Following block is used for the testing
+test:
+  rpmfile: pkg-packer-rpm-test-0.0.0-1.el7.x86_64.rpm

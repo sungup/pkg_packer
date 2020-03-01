@@ -6,7 +6,7 @@ env:
   GOARCH: "amd64"
   REPO_NAME: github.com/${{ github.repository }}
   PKG_PACKER_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer
-  PKG_PACKER_SOURCE: pkg_packer/cmd/pkg_packer
+  PKG_PACKER_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer
 
 jobs:
   build:
@@ -26,7 +26,6 @@ jobs:
       - name: Set environment on build
         run: |
           echo ::set-env name=GOPATH::${HOME}/go
-          echo ::set-env name=REPO_NAME::$(basename ${{ github.repository }})
 
       - name: Setup GO build environment
         run: |
