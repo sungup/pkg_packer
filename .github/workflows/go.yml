@@ -7,6 +7,8 @@ env:
   REPO_NAME: github.com/${{ github.repository }}
   PKG_PACKER_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer
   PKG_PACKER_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer
+  PKG_PACKER_SAMPLE_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer-sample
+  PKG_PACKER_SAMPLE_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer_sample
 
 jobs:
   build:
@@ -39,6 +41,14 @@ jobs:
           go fmt $(go list ./... | grep -v /vendor/)
           go vet $(go list ./... | grep -v /vendor/)
           go test -race $(go list ./... | grep -v /vendor/)
+
+      - name: Build-test
+        run: |
+          mkdir temp
+          go build -v -ldflags "-extldflags '-statis'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
+          go build -v -ldflags "-extldflags '-statis'" -o ${PKG_PACKER_SAMPLE_TARGET} ${PKG_PACKER_SAMPLE_SOURCE}
+          ${PKG_PACKER_SAMPLE_TARGET}
+          ${PKG_PACKER_TARGET} -source test -yaml temp/test.yml
 
       - name: Build-amd64
         run: |
