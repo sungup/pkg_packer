@@ -67,4 +67,4 @@ jobs:
         with:
           name: sample-artifact
           # please sync with pkg-packer self configuration version
-          path: build/pkg-packer/pkg-pakcer-0.0.1.el7.x86_64.rpm
+          path: build/pkg-packer/pkg-packer-0.0.1.el7.x86_64.rpm
