@@ -16,7 +16,7 @@ type PackageFile struct {
 	MTime time.Time `yaml:"mtime"`
 }
 
-func (file PackageFile) FileData() []byte {
+func (file *PackageFile) FileData() []byte {
 	if data, err := ioutil.ReadFile(file.Src); err == nil {
 		return data
 	} else if file.Body != "" {
@@ -26,7 +26,7 @@ func (file PackageFile) FileData() []byte {
 	}
 }
 
-func (file PackageFile) FileMode() uint {
+func (file *PackageFile) FileMode() uint {
 	if stat, err := os.Stat(file.Src); err == nil && !stat.IsDir() {
 		return uint(stat.Mode())
 	} else {
@@ -34,7 +34,7 @@ func (file PackageFile) FileMode() uint {
 	}
 }
 
-func (file PackageFile) FileMTime() time.Time {
+func (file *PackageFile) FileMTime() time.Time {
 	if stat, err := os.Stat(file.Src); err == nil && !stat.IsDir() {
 		return stat.ModTime()
 	} else {

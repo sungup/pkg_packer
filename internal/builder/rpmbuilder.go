@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"github.com/google/rpmpack"
 	"github.com/sungup/pkg_packer/internal/pkg"
-	"time"
+	"io"
 )
 
 type RPMBuilder struct {
 	PackageBuilder
+
+	pkgInfo *pkg.Package
 }
 
-func (rpm RPMBuilder) Metadata(meta *pkg.PackageMeta) rpmpack.RPMMetaData {
+func (rpm *RPMBuilder) rpmMetadata(meta pkg.PackageMeta) rpmpack.RPMMetaData {
 	return rpmpack.RPMMetaData{
 		Name:        meta.Name,
 		Summary:     meta.Summary,
@@ -29,7 +31,7 @@ func (rpm RPMBuilder) Metadata(meta *pkg.PackageMeta) rpmpack.RPMMetaData {
 		BuildHost:   "",
 		Compressor:  "",
 		Epoch:       0,
-		BuildTime:   time.Now(),
+		BuildTime:   meta.BuildTime(),
 		Provides:    nil,
 		Obsoletes:   nil,
 		Suggests:    nil,
@@ -39,11 +41,24 @@ func (rpm RPMBuilder) Metadata(meta *pkg.PackageMeta) rpmpack.RPMMetaData {
 	}
 }
 
-func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFile {
+func (rpm *RPMBuilder) dirToRPMFile(info pkg.PackageDir) rpmpack.RPMFile {
+	// Ignore MTime because the directories' modified time will be changed
+	// because of their contents in directory
+	return rpmpack.RPMFile{
+		Name:  info.Dest,
+		Mode:  info.Mode + 040000,
+		Owner: info.Owner,
+		Group: info.Group,
+	}
+}
+
+func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pkg.PackageFile) (rpmpack.RPMFile, error) {
 	fileType := rpmpack.GenericFile
 
 	// string to type
 	switch typeName {
+	case "generic":
+		fileType = rpmpack.GenericFile
 	case "config":
 		fileType = rpmpack.ConfigFile
 	case "doc":
@@ -67,7 +82,8 @@ func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFi
 		fileType = rpmpack.ExcludeFile
 
 	default:
-		fileType = rpmpack.GenericFile
+		return rpmpack.RPMFile{},
+			errors.New("unexpected file type: " + typeName)
 	}
 
 	return rpmpack.RPMFile{
@@ -78,10 +94,12 @@ func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFi
 		Group: info.Group,
 		MTime: uint32(info.FileMTime().Unix()),
 		Type:  fileType,
-	}
+	}, nil
 }
 
-func (rpm RPMBuilder) Filename(meta *pkg.PackageMeta) (string, error) {
+func (rpm *RPMBuilder) Filename() (string, error) {
+	meta := rpm.pkgInfo.Meta
+
 	if meta.Name == "" {
 		return "", errors.New("undefined package name")
 	} else if meta.Version == "" {
@@ -104,7 +122,48 @@ func (rpm RPMBuilder) Filename(meta *pkg.PackageMeta) (string, error) {
 	), nil
 }
 
-func (rpm RPMBuilder) Build(_ *pkg.Package) error {
-	// TODO Implementing here
-	return errors.New("build function not yet implemented")
+func (rpm *RPMBuilder) Build(writer io.Writer) error {
+	var rpmPack *rpmpack.RPM
+	var err error
+
+	// 0. make rpm metadata
+	if rpmPack, err = rpmpack.NewRPM(rpm.rpmMetadata(rpm.pkgInfo.Meta)); err != nil {
+		return err
+	}
+
+	// 1. add directory list
+	for _, dir := range rpm.pkgInfo.Dirs {
+		rpmPack.AddFile(rpm.dirToRPMFile(dir))
+	}
+
+	// 2. add files
+	for typeName, fList := range rpm.pkgInfo.Files {
+		for _, fItem := range fList {
+			if rpmFile, err := rpm.fileToRPMFile(typeName, fItem); err == nil {
+				rpmPack.AddFile(rpmFile)
+			} else {
+				return err
+			}
+		}
+	}
+
+	// 3. add prein/postin/preun/postun
+	rpmPack.AddPrein(rpm.pkgInfo.PreInScript())
+	rpmPack.AddPostin(rpm.pkgInfo.PostInScript())
+	rpmPack.AddPreun(rpm.pkgInfo.PreUnScript())
+	rpmPack.AddPostun(rpm.pkgInfo.PostUnScript())
+
+	if err = rpmPack.Write(writer); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func NewRPMBuilder(pkgInfo *pkg.Package) *RPMBuilder {
+	builder := new(RPMBuilder)
+
+	builder.pkgInfo = pkgInfo
+
+	return builder
 }

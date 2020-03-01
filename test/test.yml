@@ -1,5 +1,5 @@
 meta:
-  name: meta-test
+  name: pkg-packer-rpm-test
   version: 0.0.0-1
   release: el7
   arch: x86_64
@@ -10,13 +10,13 @@ meta:
     very
     long description
 directory:
-  - dest: /tmp/testdir
+  - dest: /var/lib/pkg-packer-test
     mode: 0755
-    owner: wheal
-    group: wheal
+    owner: root
+    group: root
 files:
   generic:
-    - dest: /tmp/testdir/helloworld
+    - dest: /var/lib/pkg-packer-test/helloworld
       body: |-
         #!/bin/bash
         echo "Hello World!"
@@ -36,4 +36,4 @@ postun:
   - echo Bless your future;
 # Following block is used for the testing
 test:
-  rpmfile: meta-test-0.0.0-1.el7.x86_64.rpm
+  rpmfile: pkg-packer-rpm-test-0.0.0-1.el7.x86_64.rpm

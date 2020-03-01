@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
+	"time"
 )
 
 type Package struct {
@@ -53,6 +54,10 @@ func (pkg *Package) PostUnScript() string {
 	return strings.Join(pkg.PostUn, "\n")
 }
 
+func (pkg *Package) init() {
+	pkg.Meta.UpdateBuildTime(time.Now().UTC())
+}
+
 func LoadPkgInfo(filepath string) (*Package, error) {
 	buffer, err := ioutil.ReadFile(filepath)
 
@@ -60,11 +65,31 @@ func LoadPkgInfo(filepath string) (*Package, error) {
 		return nil, err
 	}
 
-	pack := new(Package)
+	pkg := new(Package)
 
-	if err := yaml.Unmarshal(buffer, pack); err != nil {
+	if err := yaml.Unmarshal(buffer, pkg); err != nil {
 		return nil, err
 	}
 
-	return pack, nil
+	pkg.init()
+
+	return pkg, nil
+}
+
+func NewPackage(meta PackageMeta) *Package {
+	pkg := new(Package)
+
+	pkg.Meta = meta
+
+	pkg.Dirs = make([]PackageDir, 0)
+	pkg.Files = make(map[string][]PackageFile)
+
+	pkg.PreIn = make([]string, 0)
+	pkg.PostIn = make([]string, 0)
+	pkg.PreUn = make([]string, 0)
+	pkg.PostUn = make([]string, 0)
+
+	pkg.init()
+
+	return pkg
 }

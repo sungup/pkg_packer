@@ -1,5 +1,7 @@
 package pkg
 
+import "time"
+
 type PackageMeta struct {
 	Name    string `yaml:"name,omitempty"`
 	Version string `yaml:"version,omitempty"`
@@ -15,5 +17,14 @@ type PackageMeta struct {
 	URL     string `yaml:"url,omitempty"`
 	License string `yaml:"license,omitempty"`
 
+	buildTime time.Time
 	// TODO add requires
+}
+
+func (meta *PackageMeta) BuildTime() time.Time {
+	return meta.buildTime.UTC()
+}
+
+func (meta *PackageMeta) UpdateBuildTime(buildTime time.Time) {
+	meta.buildTime = buildTime
 }

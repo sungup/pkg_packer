@@ -1,10 +1,8 @@
 package builder
 
-import (
-	"github.com/sungup/pkg_packer/internal/pkg"
-)
+import "io"
 
 type PackageBuilder interface {
-	Filename(meta *pkg.PackageMeta) (string, error)
-	Build(info *pkg.Package) error
+	Filename() (string, error)
+	Build(rpmPath io.Writer) error
 }
