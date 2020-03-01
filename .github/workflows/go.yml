@@ -10,6 +10,9 @@ env:
   PKG_PACKER_SAMPLE_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer-sample
   PKG_PACKER_SAMPLE_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer_sample
 
+  PKG_PACKER_BUILD_HOME: ${{ github.workspace }}/build
+  PKG_PACKER_SELF_BUILD: ${{ github.workspace }}/build/pkg-packer
+
 jobs:
   build:
     name: Build
@@ -42,10 +45,10 @@ jobs:
           go vet $(go list ./... | grep -v /vendor/)
           go test -race $(go list ./... | grep -v /vendor/)
 
-      - name: Build-test
+      - name: Build test
         run: |
           mkdir temp
-          cp test/test.yml temp/test.yml
+          cp ${{ github.workspace }}/test/test.yml temp/test.yml
 
           go build -v -ldflags "-extldflags '-statis'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
           go build -v -ldflags "-extldflags '-statis'" -o ${PKG_PACKER_SAMPLE_TARGET} ${PKG_PACKER_SAMPLE_SOURCE}
@@ -53,8 +56,15 @@ jobs:
           ${PKG_PACKER_SAMPLE_TARGET}
           ${PKG_PACKER_TARGET} -source test -yaml temp/test.yml
 
-      - name: Build-amd64
+      - name: Build amd64
         run: |
           go build -v -ldflags "-extldflags '-static'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
 
-          ${PKG_PACKER_TARGET} -source build -yaml build/pkg-packer/pkg-packer-el7.yml
+          ${PKG_PACKER_TARGET} -source ${PKG_PACKER_BUILD_HOME} -yaml ${PKG_PACKER_SELF_BUILD}/pkg-packer-el7.yml
+
+      - name: Save Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: sample-artifact
+          # please sync with pkg-packer self configuration version
+          path: build/pkg-packer/pkg-pakcer-0.0.1.el7.x86_64.rpm
