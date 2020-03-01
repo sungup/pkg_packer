@@ -10,11 +10,11 @@ import (
 func TestPackageFile_FileData(t *testing.T) {
 	a := assert.New(t)
 
-	testPath, _ := test.GetTestFilePath(test.ExpectFile)
+	testPath, _ := test.GetTestFilePath(test.ExpectFile1)
 	invalidPath := testPath + ".invalid"
 
 	defaultBody := test.RandBytes(t)
-	loadedBody, _ := test.LoadTestFile(test.ExpectFile)
+	loadedBody, _ := test.LoadTestFile(test.ExpectFile1)
 
 	pkg := PackageFile{}
 	var testedBody []byte
@@ -50,7 +50,7 @@ func TestPackageFile_FileData(t *testing.T) {
 func TestPackageFile_FileMode(t *testing.T) {
 	a := assert.New(t)
 
-	testPath, _ := test.GetTestFilePath(test.ExpectFile)
+	testPath, _ := test.GetTestFilePath(test.ExpectFile1)
 	invalidPath := ""
 
 	defaultMode := uint(0111) // --x--x--x permission
@@ -77,7 +77,7 @@ func TestPackageFile_FileMode(t *testing.T) {
 func TestPackageFile_FileMTime(t *testing.T) {
 	a := assert.New(t)
 
-	testPath, _ := test.GetTestFilePath(test.ExpectFile)
+	testPath, _ := test.GetTestFilePath(test.ExpectFile1)
 	invalidPath := ""
 
 	defaultMTime := time.Now()

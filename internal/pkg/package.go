@@ -3,6 +3,7 @@ package pkg
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"path"
 	"strings"
 	"time"
 )
@@ -18,6 +19,8 @@ type Package struct {
 
 	PreUn  []string `yaml:"preun"`
 	PostUn []string `yaml:"postun"`
+
+	srcHome string
 }
 
 // Setters
@@ -54,11 +57,39 @@ func (pkg *Package) PostUnScript() string {
 	return strings.Join(pkg.PostUn, "\n")
 }
 
-func (pkg *Package) init() {
-	pkg.Meta.UpdateBuildTime(time.Now().UTC())
+func (pkg *Package) joinedFilePath(filePath string) string {
+	if filePath != "" && !strings.HasPrefix(filePath, "/") {
+		return path.Join(pkg.srcHome, filePath)
+	} else {
+		return filePath
+	}
 }
 
-func LoadPkgInfo(filepath string) (*Package, error) {
+func (pkg *Package) init() {
+	pkg.Meta.UpdateBuildTime(time.Now().UTC())
+
+	// update all pkg directory which have src directory
+	for key, fileList := range pkg.Files {
+		for idx, file := range fileList {
+			pkg.Files[key][idx].Src = pkg.joinedFilePath(file.Src)
+		}
+	}
+}
+
+func (pkg *Package) AddDirectory(pkgDir PackageDir) {
+	pkg.Dirs = append(pkg.Dirs, pkgDir)
+}
+
+func (pkg *Package) AddFile(fileType string, pkgFile PackageFile) error {
+	pkgFile.Src = pkg.joinedFilePath(pkgFile.Src)
+
+	// TODO check file type
+	pkg.Files[fileType] = append(pkg.Files[fileType], pkgFile)
+
+	return nil
+}
+
+func LoadPkgInfo(filepath string, srcHome string) (*Package, error) {
 	buffer, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
@@ -71,12 +102,14 @@ func LoadPkgInfo(filepath string) (*Package, error) {
 		return nil, err
 	}
 
+	pkg.srcHome = srcHome
+
 	pkg.init()
 
 	return pkg, nil
 }
 
-func NewPackage(meta PackageMeta) *Package {
+func NewPackage(meta PackageMeta, srcHome string) *Package {
 	pkg := new(Package)
 
 	pkg.Meta = meta
@@ -88,6 +121,8 @@ func NewPackage(meta PackageMeta) *Package {
 	pkg.PostIn = make([]string, 0)
 	pkg.PreUn = make([]string, 0)
 	pkg.PostUn = make([]string, 0)
+
+	pkg.srcHome = srcHome
 
 	pkg.init()
 
