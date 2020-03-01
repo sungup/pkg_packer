@@ -23,7 +23,7 @@ var (
 		2020, 02, 29,
 		01, 19, 47, 843167765,
 		time.UTC,
-	).Unix()
+	)
 )
 
 type YAMLTestData struct {
