@@ -45,8 +45,11 @@ jobs:
       - name: Build-test
         run: |
           mkdir temp
+          cp test/test.yml temp/test.yml
+
           go build -v -ldflags "-extldflags '-statis'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
           go build -v -ldflags "-extldflags '-statis'" -o ${PKG_PACKER_SAMPLE_TARGET} ${PKG_PACKER_SAMPLE_SOURCE}
+
           ${PKG_PACKER_SAMPLE_TARGET}
           ${PKG_PACKER_TARGET} -source test -yaml temp/test.yml
 
