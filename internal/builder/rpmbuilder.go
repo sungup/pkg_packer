@@ -54,6 +54,7 @@ func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFi
 		fileType = rpmpack.MissingOkFile
 	case "no_replace":
 		fileType = rpmpack.NoReplaceFile
+
 	case "spec":
 		fileType = rpmpack.SpecFile
 	case "ghost":
@@ -64,6 +65,7 @@ func (rpm RPMBuilder) File(typeName string, info *pkg.PackageFile) rpmpack.RPMFi
 		fileType = rpmpack.ReadmeFile
 	case "exclude":
 		fileType = rpmpack.ExcludeFile
+
 	default:
 		fileType = rpmpack.GenericFile
 	}

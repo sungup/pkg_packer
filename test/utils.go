@@ -1,11 +1,12 @@
 package test
 
 import (
-	"crypto/rand"
+	crand "crypto/rand"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	mrand "math/rand"
 	"os"
 	"path"
 	"runtime"
@@ -16,6 +17,9 @@ import (
 const (
 	ExpectFile     = "test.yml"
 	ExpectFileMode = uint(0644)
+
+	randStrMin = 5
+	randStrMax = 10
 )
 
 var (
@@ -24,6 +28,8 @@ var (
 		01, 19, 47, 843167765,
 		time.UTC,
 	)
+
+	randStringMap = []byte("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-_.")
 )
 
 type YAMLTestData struct {
@@ -31,14 +37,35 @@ type YAMLTestData struct {
 	Test map[string]string `yaml:"test"`
 }
 
-func RandString(t *testing.T) []byte {
+func RandBytes(t *testing.T) []byte {
 	a := assert.New(t)
 
 	defaults := make([]byte, 16)
-	_, err := rand.Read(defaults)
+	_, err := crand.Read(defaults)
 	a.NoError(err)
 
+	for i := 0; i < len(defaults); i++ {
+		defaults[i] = randStringMap[int(defaults[i])%len(randStringMap)]
+	}
+
 	return defaults
+}
+
+func RandString(t *testing.T) string {
+	return string(RandBytes(t))
+}
+
+func RandStrings(t *testing.T) []string {
+	buffer := make([]string, 0)
+
+	seed := mrand.NewSource(time.Now().UnixNano())
+	items := int(randStrMin + mrand.New(seed).Int31n(randStrMax-randStrMin))
+
+	for i := 0; i < items; i++ {
+		buffer = append(buffer, RandString(t))
+	}
+
+	return buffer
 }
 
 func GetTestFilePath(filepath string) (string, error) {

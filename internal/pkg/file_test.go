@@ -13,7 +13,7 @@ func TestPackageFile_FileData(t *testing.T) {
 	testPath, _ := test.GetTestFilePath(test.ExpectFile)
 	invalidPath := testPath + ".invalid"
 
-	defaultBody := test.RandString(t)
+	defaultBody := test.RandBytes(t)
 	loadedBody, _ := test.LoadTestFile(test.ExpectFile)
 
 	pkg := PackageFile{}
