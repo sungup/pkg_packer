@@ -153,11 +153,14 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 	rpmPack.AddPreun(rpm.pkgInfo.PreUnScript())
 	rpmPack.AddPostun(rpm.pkgInfo.PostUnScript())
 
-	if err = rpmPack.Write(writer); err != nil {
-		return err
+	// 4. add dependencies
+	for _, dependency := range rpm.pkgInfo.Dependencies {
+		if err := rpmPack.Requires.Set(dependency); err != nil {
+			return err
+		}
 	}
 
-	return nil
+	return rpmPack.Write(writer)
 }
 
 func NewRPMBuilder(pkgInfo *pkg.Package) *RPMBuilder {
