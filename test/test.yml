@@ -34,6 +34,8 @@ preun:
 postun:
   - echo Bye World.
   - echo Bless your future;
+dependencies:
+  - kernel>=3.10.0-1062
 # Following block is used for the testing
 test:
   rpmfile: pkg-packer-rpm-test-0.0.0-1.el7.x86_64.rpm
