@@ -20,6 +20,8 @@ type Package struct {
 	PreUn  []string `yaml:"preun"`
 	PostUn []string `yaml:"postun"`
 
+	Dependencies []string `yaml:"dependencies"`
+
 	srcHome string
 }
 
@@ -121,6 +123,8 @@ func NewPackage(meta PackageMeta, srcHome string) *Package {
 	pkg.PostIn = make([]string, 0)
 	pkg.PreUn = make([]string, 0)
 	pkg.PostUn = make([]string, 0)
+
+	pkg.Dependencies = make([]string, 0)
 
 	pkg.srcHome = srcHome
 
