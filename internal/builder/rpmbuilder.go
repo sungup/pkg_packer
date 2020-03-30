@@ -60,7 +60,9 @@ func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pkg.PackageFile) (rpm
 	case "generic":
 		fileType = rpmpack.GenericFile
 	case "config":
-		fileType = rpmpack.ConfigFile
+		// file types is a flag variable. so, config file type only keep the original config while removing
+		// not updating. thus, if you keep the original config file while updating, add "NoReplaceFile" flag.
+		fileType = rpmpack.ConfigFile | rpmpack.NoReplaceFile
 	case "doc":
 		fileType = rpmpack.DocFile
 	case "not_use":

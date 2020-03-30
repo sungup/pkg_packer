@@ -1,6 +1,6 @@
 meta:
   name: pkg-packer
-  version: 0.0.1
+  version: 0.0.1-1
   release: el7
   arch: x86_64
   summary: pkg-packer build tool
