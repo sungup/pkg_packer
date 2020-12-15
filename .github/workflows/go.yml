@@ -4,6 +4,7 @@ env:
   GO111MODULE: "off"
   GOOS: "linux"
   GOARCH: "amd64"
+  GOHOME: ${HOME}/go
   REPO_NAME: github.com/${{ github.repository }}
   PKG_PACKER_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer
   PKG_PACKER_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer
@@ -27,10 +28,6 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-
-      - name: Set environment on build
-        run: |
-          echo ::set-env name=GOPATH::${HOME}/go
 
       - name: Setup GO build environment
         run: |
