@@ -4,7 +4,7 @@ env:
   GO111MODULE: "off"
   GOOS: "linux"
   GOARCH: "amd64"
-  GOPATH: ${HOME}/go
+  GOPATH: ${{ env.home }}/go
   REPO_NAME: github.com/${{ github.repository }}
   PKG_PACKER_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer
   PKG_PACKER_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer
