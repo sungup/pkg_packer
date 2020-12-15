@@ -4,17 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/rpmpack"
-	"github.com/sungup/pkg_packer/internal/pkg"
+	"github.com/sungup/pkg_packer/internal/info"
 	"io"
 )
 
 type RPMBuilder struct {
 	PackageBuilder
 
-	pkgInfo *pkg.Package
+	pkgInfo *info.Package
 }
 
-func (rpm *RPMBuilder) rpmMetadata(meta pkg.PackageMeta) rpmpack.RPMMetaData {
+func (rpm *RPMBuilder) rpmMetadata(meta info.PackageMeta) rpmpack.RPMMetaData {
 	return rpmpack.RPMMetaData{
 		Name:        meta.Name,
 		Summary:     meta.Summary,
@@ -25,7 +25,7 @@ func (rpm *RPMBuilder) rpmMetadata(meta pkg.PackageMeta) rpmpack.RPMMetaData {
 		OS:          meta.OS,
 		Vendor:      meta.Vendor,
 		URL:         meta.URL,
-		Packager:    "",
+		Packager:    meta.Maintainer,
 		Group:       "",
 		Licence:     meta.License,
 		BuildHost:   "",
@@ -41,7 +41,7 @@ func (rpm *RPMBuilder) rpmMetadata(meta pkg.PackageMeta) rpmpack.RPMMetaData {
 	}
 }
 
-func (rpm *RPMBuilder) dirToRPMFile(info pkg.PackageDir) rpmpack.RPMFile {
+func (rpm *RPMBuilder) dirToRPMFile(info info.PackageDir) rpmpack.RPMFile {
 	// Ignore MTime because the directories' modified time will be changed
 	// because of their contents in directory
 	return rpmpack.RPMFile{
@@ -52,7 +52,7 @@ func (rpm *RPMBuilder) dirToRPMFile(info pkg.PackageDir) rpmpack.RPMFile {
 	}
 }
 
-func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pkg.PackageFile) (rpmpack.RPMFile, error) {
+func (rpm *RPMBuilder) fileToRPMFile(typeName string, info info.PackageFile) (rpmpack.RPMFile, error) {
 	fileType := rpmpack.GenericFile
 
 	// string to type
@@ -157,7 +157,7 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 
 	// 4. add dependencies
 	for _, dependency := range rpm.pkgInfo.Dependencies {
-		if err := rpmPack.Requires.Set(dependency); err != nil {
+		if err := rpmPack.Requires.Set(dependency.RpmFormat()); err != nil {
 			return err
 		}
 	}
@@ -165,10 +165,8 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 	return rpmPack.Write(writer)
 }
 
-func NewRPMBuilder(pkgInfo *pkg.Package) *RPMBuilder {
-	builder := new(RPMBuilder)
-
-	builder.pkgInfo = pkgInfo
-
-	return builder
+func NewRPMBuilder(pkgInfo *info.Package) PackageBuilder {
+	return &RPMBuilder{
+		pkgInfo: pkgInfo,
+	}
 }

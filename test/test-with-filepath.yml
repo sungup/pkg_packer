@@ -1,8 +1,9 @@
 meta:
-  name: pkg-packer-rpm-test
+  name: pkg-packer-test
   version: 0.0.0-1
   release: el7
   arch: x86_64
+  maintainer: Sungup Moon <sungup@me.com>
   summary: |-
     summary info
   desc: |-
