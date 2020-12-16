@@ -4,7 +4,6 @@ env:
   GO111MODULE: "off"
   GOOS: "linux"
   GOARCH: "amd64"
-  GOPATH: ${{ env.home }}/go
   REPO_NAME: github.com/${{ github.repository }}
   PKG_PACKER_TARGET: ${{ github.workspace }}/build/amd64/pkg-packer
   PKG_PACKER_SOURCE: github.com/${{ github.repository }}/cmd/pkg_packer
@@ -21,7 +20,7 @@ jobs:
 
     steps:
       - name: Set up Go 1.13
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2.1.3
         with:
           go-version: 1.13
         id: go
@@ -65,4 +64,4 @@ jobs:
         with:
           name: pkg-packer-v0.0.1-1
           # please sync with pkg-packer self configuration version
-          path: build/pkg-packer/pkg-packer-0.0.1-1.el7.x86_64.rpm
+          path: build/pkg-packer/pkg-packer-0.0.1-1.*
