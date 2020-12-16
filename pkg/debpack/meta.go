@@ -10,7 +10,7 @@ import (
 
 type Relations []string
 
-func (r *Relations) Set(pkgString string)  error {
+func (r *Relations) Set(pkgString string) error {
 	for _, relation := range *r {
 		if relation == pkgString {
 			return nil
@@ -35,7 +35,7 @@ type DEBMetaData struct {
 	Origin,
 	Bugs,
 	Homepage string
-	Tag []string
+	Tag    []string
 	Source string
 	Depends,
 	PreDepends,

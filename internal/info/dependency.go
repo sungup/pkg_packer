@@ -20,19 +20,19 @@ func (dep *Dependency) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	re, err := regexp.Compile("[<=>]+")
-	if err !=nil {
+	if err != nil {
 		return fmt.Errorf("unexpected regex format: %v", err)
 	}
 
 	pos := re.FindStringIndex(verString)
 	if pos == nil {
-		dep.name     = verString
+		dep.name = verString
 		dep.operator = ""
-		dep.ver      = ""
+		dep.ver = ""
 	} else {
-		dep.name     = verString[:pos[0]]
+		dep.name = verString[:pos[0]]
 		dep.operator = verString[pos[0]:pos[1]]
-		dep.ver      = verString[pos[1]:]
+		dep.ver = verString[pos[1]:]
 	}
 
 	return nil

@@ -9,13 +9,13 @@ import (
 
 func TestDependency_UnmarshalYAML(t *testing.T) {
 	const (
-		format = "dep: %s%s%s"
+		format      = "dep: %s%s%s"
 		expectedPkg = "hello"
 	)
 
 	a := assert.New(t)
 
-	var testCase = []string {
+	var testCase = []string{
 		"",
 		">",
 		">=",
@@ -37,7 +37,7 @@ func TestDependency_UnmarshalYAML(t *testing.T) {
 
 		a.NoError(yaml.Unmarshal([]byte(input), &tested))
 		a.Equal(expectedPkg, tested.Dep.name)
-		a.Equal(expectedOp,  tested.Dep.operator)
+		a.Equal(expectedOp, tested.Dep.operator)
 		a.Equal(expectedVer, tested.Dep.ver)
 	}
 }

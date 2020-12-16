@@ -22,15 +22,15 @@ type DEBBuilder struct {
 //  - md5sums file
 
 func (deb *DEBBuilder) metadata(meta info.PackageMeta) debpack.DEBMetaData {
-	 return debpack.DEBMetaData{
-		 Package:      meta.Name,
-		 Version:      meta.Version,
-		 Maintainer:   meta.Maintainer,
-		 Summary:      meta.Summary,
-		 Description:  meta.Description,
-		 Architecture: deb.arch(),
-		 Homepage:     meta.URL,
-	 }
+	return debpack.DEBMetaData{
+		Package:      meta.Name,
+		Version:      meta.Version,
+		Maintainer:   meta.Maintainer,
+		Summary:      meta.Summary,
+		Description:  meta.Description,
+		Architecture: deb.arch(),
+		Homepage:     meta.URL,
+	}
 }
 
 func (deb *DEBBuilder) dirToDEBFile(info info.PackageDir) debpack.DEBFile {
@@ -131,7 +131,7 @@ func (deb *DEBBuilder) Filename() (string, error) {
 func (deb *DEBBuilder) Build(writer io.Writer) error {
 	var (
 		debPack *debpack.DEB
-		err error
+		err     error
 	)
 
 	if debPack, err = debpack.NewDEB(deb.metadata(deb.pkgInfo.Meta)); err != nil {
@@ -168,6 +168,6 @@ func (deb *DEBBuilder) Build(writer io.Writer) error {
 
 func NewDEBBuilder(pkgInfo *info.Package) PackageBuilder {
 	return &DEBBuilder{
-		pkgInfo:pkgInfo,
+		pkgInfo: pkgInfo,
 	}
 }

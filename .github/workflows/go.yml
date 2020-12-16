@@ -62,6 +62,8 @@ jobs:
       - name: Save Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: pkg-packer-v0.0.1-1
+          name: pkg-packer-v0.1.0
           # please sync with pkg-packer self configuration version
-          path: build/pkg-packer/pkg-packer-0.0.1-1.*
+          path: |
+            build/pkg-packer/pkg-packer-0.1.0.el7.x86_64.rpm
+            build/pkg-packer/pkg-packer_0.1.0_amd64.deb

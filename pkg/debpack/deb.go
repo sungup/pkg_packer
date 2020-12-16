@@ -120,7 +120,7 @@ func (deb *DEB) compressFile(file *DEBFile, data *tarGzWriter, md5sum *md5Writer
 		return err
 	}
 
-	h := tar.Header {
+	h := tar.Header{
 		Name:     installPath,
 		Size:     int64(len(file.Body)),
 		Mode:     int64(file.Mode),
@@ -171,10 +171,10 @@ func (deb *DEB) compressDir(file *DEBFile, data *tarGzWriter) error {
 
 func (deb *DEB) compressMeta(filename string, body []byte, meta *tarGzWriter) error {
 	h := tar.Header{
-		Name: filename,
-		Size: int64(len(body)),
-		Mode: 0644,
-		ModTime: time.Now(),
+		Name:     filename,
+		Size:     int64(len(body)),
+		Mode:     0644,
+		ModTime:  time.Now(),
 		Typeflag: tar.TypeReg,
 	}
 
@@ -219,9 +219,9 @@ func (deb *DEB) compressScripts(meta *tarGzWriter) error {
 
 func (deb *DEB) arCompress(writer *ar.Writer, filename string, body []byte) error {
 	h := ar.Header{
-		Name: filename,
-		Size: int64(len(body)),
-		Mode: 0644,
+		Name:    filename,
+		Size:    int64(len(body)),
+		Mode:    0644,
 		ModTime: time.Now(),
 	}
 
@@ -235,8 +235,8 @@ func (deb *DEB) arCompress(writer *ar.Writer, filename string, body []byte) erro
 }
 
 func (deb *DEB) Write(w io.Writer) error {
-	meta   := newTarGz()
-	data   := newTarGz()
+	meta := newTarGz()
+	data := newTarGz()
 	md5sum := newMD5()
 
 	// 1. compress file information
@@ -294,10 +294,10 @@ func (deb *DEB) Write(w io.Writer) error {
 }
 
 func (deb *DEB) AddFile(file DEBFile) { deb.files = append(deb.files, file) }
-func (deb *DEB) AddPrein(s string)  { deb.preIn = s }
-func (deb *DEB) AddPostin(s string) { deb.postIn = s }
-func (deb *DEB) AddPreun(s string)  { deb.preUn = s }
-func (deb *DEB) AddPostun(s string) { deb.postUn = s }
+func (deb *DEB) AddPrein(s string)    { deb.preIn = s }
+func (deb *DEB) AddPostin(s string)   { deb.postIn = s }
+func (deb *DEB) AddPreun(s string)    { deb.preUn = s }
+func (deb *DEB) AddPostun(s string)   { deb.postUn = s }
 
 // NewDEB is a constructor for the debian package builder.
 func NewDEB(meta DEBMetaData) (*DEB, error) {

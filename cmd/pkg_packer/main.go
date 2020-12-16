@@ -14,6 +14,7 @@ type PkgPackerArgs struct {
 	srcDir   string
 	yamlPath string
 	yamlHome string
+	pkgType  string
 }
 
 func argParse() PkgPackerArgs {
@@ -21,12 +22,54 @@ func argParse() PkgPackerArgs {
 
 	flag.StringVar(&args.srcDir, "source", ".", "package source directory")
 	flag.StringVar(&args.yamlPath, "yaml", "recipe.yml", "packaging recipe file")
+	flag.StringVar(&args.pkgType, "pkg-type", "all", "package type [all|rpm|deb]")
 
 	flag.Parse()
 
 	args.yamlHome = path.Dir(args.yamlPath)
 
 	return args
+}
+
+type builderFunc func(*info.Package) builder.PackageBuilder
+
+func (args *PkgPackerArgs) builders() []builderFunc {
+	switch args.pkgType {
+	case "rpm":
+		return []builderFunc{builder.NewRPMBuilder}
+	case "deb":
+		return []builderFunc{builder.NewDEBBuilder}
+	case "all":
+		return []builderFunc{builder.NewRPMBuilder, builder.NewDEBBuilder}
+	}
+
+	log.Fatalln("unsupported builder type")
+
+	return nil
+}
+
+func buildPackage(builder builder.PackageBuilder, directory string) {
+	var pkgFile *os.File
+	if pkgPath, err := builder.Filename(); err == nil {
+		pkgPath = path.Join(directory, pkgPath)
+
+		if pkgFile, err = os.Create(pkgPath); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Fatal(err)
+	}
+	defer func() { _ = pkgFile.Close() }()
+
+	pkgWriter := bufio.NewWriter(pkgFile)
+
+	if err := builder.Build(pkgWriter); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := pkgWriter.Flush(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
@@ -39,29 +82,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pkgBuilder := builder.NewRPMBuilder(pkgInfo)
-
-	// 2. open rpm file to store
-	var rpmFile *os.File
-	if rpmPath, err := pkgBuilder.Filename(); err == nil {
-		rpmPath = path.Join(args.yamlHome, rpmPath)
-
-		if rpmFile, err = os.Create(rpmPath); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		log.Fatal(err)
-	}
-	defer func() { _ = rpmFile.Close() }()
-
-	// 3. write and flush
-	rpmWriter := bufio.NewWriter(rpmFile)
-
-	if err := pkgBuilder.Build(rpmWriter); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := rpmWriter.Flush(); err != nil {
-		log.Fatal(err)
+	for _, builderNew := range args.builders() {
+		buildPackage(builderNew(pkgInfo), args.yamlHome)
 	}
 }

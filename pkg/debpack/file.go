@@ -41,11 +41,10 @@ func (deb *DEBFile) isConfig() bool {
 	return (deb.Type & ConfigFile) == ConfigFile
 }
 
-func (deb *DEBFile) tarTypeFlag() byte{
+func (deb *DEBFile) tarTypeFlag() byte {
 	if deb.isDir() {
 		return tar.TypeDir
 	} else {
 		return tar.TypeReg
 	}
 }
-
