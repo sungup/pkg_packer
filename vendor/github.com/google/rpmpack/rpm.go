@@ -92,6 +92,7 @@ type RPM struct {
 	postun            string
 	customTags        map[int]IndexEntry
 	customSigs        map[int]IndexEntry
+	pgpSigner         func([]byte) ([]byte, error)
 }
 
 // NewRPM creates and returns a new RPM struct.
@@ -184,7 +185,13 @@ func (r *RPM) Write(w io.Writer) error {
 	// Write the regular header.
 	h := newIndex(immutable)
 	r.writeGenIndexes(h)
-	r.writeFileIndexes(h)
+
+	// do not write file indexes if there are no files (meta package)
+	// doing so will result in an invalid package
+	if (len(r.files)) > 0 {
+		r.writeFileIndexes(h)
+	}
+
 	if err := r.writeRelationIndexes(h); err != nil {
 		return err
 	}
@@ -196,7 +203,10 @@ func (r *RPM) Write(w io.Writer) error {
 	}
 	// Write the signatures
 	s := newIndex(signatures)
-	r.writeSignatures(s, hb)
+	if err := r.writeSignatures(s, hb); err != nil {
+		return errors.Wrap(err, "failed to create signatures")
+	}
+
 	s.AddEntries(r.customSigs)
 	sb, err := s.Bytes()
 	if err != nil {
@@ -218,11 +228,28 @@ func (r *RPM) Write(w io.Writer) error {
 
 }
 
+// SetPGPSigner registers a function that will accept the header and payload as bytes,
+// and return a signature as bytes. The function should simulate what gpg does,
+// probably by using golang.org/x/crypto/openpgp or by forking a gpg process.
+func (r *RPM) SetPGPSigner(f func([]byte) ([]byte, error)) {
+	r.pgpSigner = f
+}
+
 // Only call this after the payload and header were written.
-func (r *RPM) writeSignatures(sigHeader *index, regHeader []byte) {
+func (r *RPM) writeSignatures(sigHeader *index, regHeader []byte) error {
 	sigHeader.Add(sigSize, EntryInt32([]int32{int32(r.payload.Len() + len(regHeader))}))
 	sigHeader.Add(sigSHA256, EntryString(fmt.Sprintf("%x", sha256.Sum256(regHeader))))
 	sigHeader.Add(sigPayloadSize, EntryInt32([]int32{int32(r.payloadSize)}))
+	if r.pgpSigner != nil {
+		body := append([]byte{}, regHeader...)
+		body = append(body, r.payload.Bytes()...)
+		s, err := r.pgpSigner(body)
+		if err != nil {
+			return errors.Wrap(err, "call to signer failed")
+		}
+		sigHeader.Add(sigPGP, EntryBytes(s))
+	}
+	return nil
 }
 
 func (r *RPM) writeRelationIndexes(h *index) error {
@@ -268,7 +295,11 @@ func (r *RPM) writeGenIndexes(h *index) {
 	h.Add(tagSummary, EntryString(r.Summary))
 	h.Add(tagDescription, EntryString(r.Description))
 	h.Add(tagBuildHost, EntryString(r.BuildHost))
-	h.Add(tagBuildTime, EntryInt32([]int32{int32(r.BuildTime.Unix())}))
+	if !r.BuildTime.IsZero() {
+		// time.Time zero value is confusing, avoid if not supplied
+		// see https://github.com/google/rpmpack/issues/43
+		h.Add(tagBuildTime, EntryInt32([]int32{int32(r.BuildTime.Unix())}))
+	}
 	h.Add(tagRelease, EntryString(r.Release))
 	h.Add(tagPayloadFormat, EntryString("cpio"))
 	h.Add(tagPayloadCompressor, EntryString(r.Compressor))
@@ -372,8 +403,8 @@ func (r *RPM) writeFile(f RPMFile) error {
 	dir, file := path.Split(f.Name)
 	r.dirindexes = append(r.dirindexes, r.di.Get(dir))
 	r.basenames = append(r.basenames, file)
-	r.fileowners = append(r.fileowners, f.Group)
-	r.filegroups = append(r.filegroups, f.Owner)
+	r.fileowners = append(r.fileowners, f.Owner)
+	r.filegroups = append(r.filegroups, f.Group)
 	r.filemtimes = append(r.filemtimes, f.MTime)
 	r.fileflags = append(r.fileflags, uint32(f.Type))
 
@@ -384,7 +415,7 @@ func (r *RPM) writeFile(f RPMFile) error {
 		r.filedigests = append(r.filedigests, "")
 		r.filelinktos = append(r.filelinktos, "")
 		links = 2
-	case f.Mode&0120000 != 0: //  symlink
+	case f.Mode&0120000 == 0120000: //  symlink
 		r.filesizes = append(r.filesizes, uint32(len(f.Body)))
 		r.filedigests = append(r.filedigests, "")
 		r.filelinktos = append(r.filelinktos, string(f.Body))
@@ -395,6 +426,11 @@ func (r *RPM) writeFile(f RPMFile) error {
 		r.filelinktos = append(r.filelinktos, "")
 	}
 	r.filemodes = append(r.filemodes, uint16(f.Mode))
+
+	// Ghost files have no payload
+	if f.Type == GhostFile {
+		return nil
+	}
 	return r.writePayload(f, links)
 }
 

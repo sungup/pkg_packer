@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"github.com/sungup/pkg_packer/internal/builder"
-	"github.com/sungup/pkg_packer/internal/pkg"
+	"github.com/sungup/pkg_packer/internal/info"
 	"log"
 	"os"
 	"path"
@@ -14,6 +14,7 @@ type PkgPackerArgs struct {
 	srcDir   string
 	yamlPath string
 	yamlHome string
+	pkgType  string
 }
 
 func argParse() PkgPackerArgs {
@@ -21,6 +22,7 @@ func argParse() PkgPackerArgs {
 
 	flag.StringVar(&args.srcDir, "source", ".", "package source directory")
 	flag.StringVar(&args.yamlPath, "yaml", "recipe.yml", "packaging recipe file")
+	flag.StringVar(&args.pkgType, "pkg-type", "all", "package type [all|rpm|deb]")
 
 	flag.Parse()
 
@@ -29,39 +31,58 @@ func argParse() PkgPackerArgs {
 	return args
 }
 
-func main() {
-	args := argParse()
+type builderFunc func(*info.Package) builder.PackageBuilder
 
-	// 1. load yaml file
-	pkgInfo, err := pkg.LoadPkgInfo(args.yamlPath, args.srcDir)
-
-	if err != nil {
-		log.Fatal(err)
+func (args *PkgPackerArgs) builders() []builderFunc {
+	switch args.pkgType {
+	case "rpm":
+		return []builderFunc{builder.NewRPMBuilder}
+	case "deb":
+		return []builderFunc{builder.NewDEBBuilder}
+	case "all":
+		return []builderFunc{builder.NewRPMBuilder, builder.NewDEBBuilder}
 	}
 
-	pkgBuilder := builder.NewRPMBuilder(pkgInfo)
+	log.Fatalln("unsupported builder type")
 
-	// 2. open rpm file to store
-	var rpmFile *os.File
-	if rpmPath, err := pkgBuilder.Filename(); err == nil {
-		rpmPath = path.Join(args.yamlHome, rpmPath)
+	return nil
+}
 
-		if rpmFile, err = os.Create(rpmPath); err != nil {
+func buildPackage(builder builder.PackageBuilder, directory string) {
+	var pkgFile *os.File
+	if pkgPath, err := builder.Filename(); err == nil {
+		pkgPath = path.Join(directory, pkgPath)
+
+		if pkgFile, err = os.Create(pkgPath); err != nil {
 			log.Fatal(err)
 		}
 	} else {
 		log.Fatal(err)
 	}
-	defer func() { _ = rpmFile.Close() }()
+	defer func() { _ = pkgFile.Close() }()
 
-	// 3. write and flush
-	rpmWriter := bufio.NewWriter(rpmFile)
+	pkgWriter := bufio.NewWriter(pkgFile)
 
-	if err := pkgBuilder.Build(rpmWriter); err != nil {
+	if err := builder.Build(pkgWriter); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := rpmWriter.Flush(); err != nil {
+	if err := pkgWriter.Flush(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func main() {
+	args := argParse()
+
+	// 1. load yaml file
+	pkgInfo, err := info.LoadPkgInfo(args.yamlPath, args.srcDir)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, builderNew := range args.builders() {
+		buildPackage(builderNew(pkgInfo), args.yamlHome)
 	}
 }

@@ -1,13 +1,12 @@
 meta:
   name: pkg-packer
-  version: 0.0.1-1
+  version: 0.1.0
   release: el7
   arch: x86_64
+  maintainer: Sungup Moon <sungup@me.com>
   summary: pkg-packer build tool
   desc: |-
     pkg-packer simple package build tool.
-
-    currently support only RPM build
 
 files:
   generic:
