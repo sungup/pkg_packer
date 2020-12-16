@@ -68,3 +68,4 @@ jobs:
           # please sync with pkg-packer self configuration version
           path: |
             ${{ github.workspace }}/build/pkg-packer/pkg-packer-0.1.0.el7.x86_64.rpm
+            ${{ github.workspace }}/build/pkg-packer/pkg-packer_0.1.0_amd64.deb
