@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p $(dirname ${GOPATH}/src/${REPO_NAME})
           ln -svf ${{ github.workspace }} ${GOPATH}/src/${REPO_NAME}
-          echo ${GOPATH}
+          echo ${HOME}
 
       # build and run using only vendor packages to build in the private network
       - name: Test
