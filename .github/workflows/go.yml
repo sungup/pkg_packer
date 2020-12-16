@@ -58,6 +58,8 @@ jobs:
           go build -v -ldflags "-extldflags '-static'" -o ${PKG_PACKER_TARGET} ${PKG_PACKER_SOURCE}
 
           ${PKG_PACKER_TARGET} -source ${PKG_PACKER_BUILD_HOME} -yaml ${PKG_PACKER_SELF_BUILD}/pkg-packer-el7.yml
+          
+          ls ${PKG_PACKER_SELF_BUILD}
 
       - name: Save Artifact
         uses: actions/upload-artifact@v2
@@ -65,4 +67,4 @@ jobs:
           name: pkg-packer-v0.1.0
           # please sync with pkg-packer self configuration version
           path: |
-            ${PKG_PACKER_SELF_BUILD}/pkg-packer-0.1.0.el7.x86_64.rpm
+            ${{ github.workspace }}/build/pkg-packer/pkg-packer-0.1.0.el7.x86_64.rpm
