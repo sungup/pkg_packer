@@ -1,11 +1,12 @@
-package info
+package old
 
 import (
 	Assert "github.com/stretchr/testify/assert"
+	"github.com/sungup/pkg_packer/internal/pack"
 	"testing"
 )
 
-func compareMetaData(t *testing.T, expect map[string]string, tested *PackageMeta) {
+func compareMetaData(t *testing.T, expect map[string]string, tested *pack.PackageMeta) {
 	assert := Assert.New(t)
 
 	assert.Equal(expect["name"], tested.Name)

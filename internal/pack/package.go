@@ -1,18 +1,43 @@
-package info
+package pack
 
 import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 	"time"
 )
 
+var (
+	sourceHome string
+)
+
+func UpdateSourceDir(dir string) {
+	sourceHome = dir
+}
+
+func absSourcePath(filepath string) string {
+	if filepath != "" && !strings.HasPrefix(filepath, "/") {
+		return path.Join(sourceHome, filepath)
+	} else {
+		return filepath
+	}
+}
+
+func init() {
+	if dir, err := os.Getwd(); err == nil {
+		UpdateSourceDir(dir)
+	} else {
+		UpdateSourceDir(".")
+	}
+}
+
 type Package struct {
 	Meta PackageMeta `yaml:"meta"`
 
-	Dirs  []PackageDir             `yaml:"directory"`
-	Files map[string][]PackageFile `yaml:"files"`
+	Dirs  []directory       `yaml:"directory"`
+	Files map[string][]file `yaml:"files"`
 
 	PreIn  []string `yaml:"prein"`
 	PostIn []string `yaml:"postin"`
@@ -59,32 +84,15 @@ func (pkg *Package) PostUnScript() string {
 	return strings.Join(pkg.PostUn, "\n")
 }
 
-func (pkg *Package) joinedFilePath(filePath string) string {
-	if filePath != "" && !strings.HasPrefix(filePath, "/") {
-		return path.Join(pkg.srcHome, filePath)
-	} else {
-		return filePath
-	}
-}
-
 func (pkg *Package) init() {
 	pkg.Meta.UpdateBuildTime(time.Now().UTC())
-
-	// update all pkg directory which have src directory
-	for key, fileList := range pkg.Files {
-		for idx, file := range fileList {
-			pkg.Files[key][idx].Src = pkg.joinedFilePath(file.Src)
-		}
-	}
 }
 
-func (pkg *Package) AddDirectory(pkgDir PackageDir) {
+func (pkg *Package) AddDirectory(pkgDir directory) {
 	pkg.Dirs = append(pkg.Dirs, pkgDir)
 }
 
-func (pkg *Package) AddFile(fileType string, pkgFile PackageFile) error {
-	pkgFile.Src = pkg.joinedFilePath(pkgFile.Src)
-
+func (pkg *Package) AddFile(fileType string, pkgFile file) error {
 	// TODO check file type
 	pkg.Files[fileType] = append(pkg.Files[fileType], pkgFile)
 
@@ -116,8 +124,8 @@ func NewPackage(meta PackageMeta, srcHome string) *Package {
 
 	pkg.Meta = meta
 
-	pkg.Dirs = make([]PackageDir, 0)
-	pkg.Files = make(map[string][]PackageFile)
+	pkg.Dirs = make([]directory, 0)
+	pkg.Files = make(map[string][]file)
 
 	pkg.PreIn = make([]string, 0)
 	pkg.PostIn = make([]string, 0)

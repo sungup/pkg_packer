@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"github.com/sungup/pkg_packer/internal/builder"
-	"github.com/sungup/pkg_packer/internal/info"
+	"github.com/sungup/pkg_packer/internal/pack"
 	"log"
 	"os"
 	"path"
@@ -37,7 +37,7 @@ func writeToDir(dir string, pkgBuilder builder.PackageBuilder) {
 }
 
 func apiSample() {
-	pkgInfo := info.NewPackage(info.PackageMeta{
+	pkgInfo := pack.NewPackage(pack.PackageMeta{
 		Name:        "rpmpack-test",
 		Version:     "0.0.1-1",
 		Release:     "el7",
@@ -50,14 +50,14 @@ func apiSample() {
 		License:     "",
 	}, ".")
 
-	pkgInfo.AddDirectory(info.PackageDir{
+	pkgInfo.AddDirectory(pack.packageDir{
 		Dest:  "/var/lib/pkg-packer-api-sample",
 		Mode:  0755,
 		Owner: "root",
 		Group: "root",
 	})
 
-	_ = pkgInfo.AddFile("config", info.PackageFile{
+	_ = pkgInfo.AddFile("config", pack.packageFile{
 		Dest:  "/var/lib/pkg-packer-api-sample/sample1.ini",
 		Body:  `[test]\nvalue="Hello api-sample log file!"`,
 		Mode:  0644,
@@ -66,7 +66,7 @@ func apiSample() {
 		MTime: time.Now(),
 	})
 
-	_ = pkgInfo.AddFile("generic", info.PackageFile{
+	_ = pkgInfo.AddFile("generic", pack.packageFile{
 		Dest:  "/var/lib/pkg-packer-api-sample/sample2.sh",
 		Body:  "#!/bin/bash\necho Hello api-sample log file!\n",
 		Mode:  0755,
@@ -83,7 +83,7 @@ func apiSample() {
 }
 
 func yamlSample(yamlPath string) {
-	pkgInfo, err := info.LoadPkgInfo(yamlPath, ".")
+	pkgInfo, err := pack.LoadPkgInfo(yamlPath, ".")
 	if err != nil {
 		log.Fatal(err)
 	}

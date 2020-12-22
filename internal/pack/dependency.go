@@ -1,4 +1,4 @@
-package info
+package pack
 
 import (
 	"fmt"
@@ -19,11 +19,12 @@ func (dep *Dependency) UnmarshalYAML(value *yaml.Node) error {
 		return fmt.Errorf("unexpected versiont type string")
 	}
 
-	re, err := regexp.Compile("[<=>]+")
+	re, err := regexp.Compile("[<=>]*")
 	if err != nil {
 		return fmt.Errorf("unexpected regex format: %v", err)
 	}
 
+	// TODO: check version string parsing
 	pos := re.FindStringIndex(verString)
 	if pos == nil {
 		dep.name = verString

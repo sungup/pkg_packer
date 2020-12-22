@@ -1,13 +1,6 @@
-package info
+package old
 
-import (
-	"github.com/stretchr/testify/assert"
-	"github.com/sungup/pkg_packer/test"
-	"path"
-	"strings"
-	"testing"
-)
-
+/*
 func createTestScripts(t *testing.T) ([]string, string) {
 	scripts := test.RandStrings(t)
 
@@ -142,7 +135,7 @@ func TestPackage_AddFile(t *testing.T) {
 	// Index 0. Append generic file from home directory
 	err = pkg.AddFile(
 		fileType,
-		PackageFile{Dest: "/tmp/test1.yml", Src: "test/test.yml"},
+		file{Dest: "/tmp/test1.yml", Src: "test/test.yml"},
 	)
 	a.NoError(err)
 
@@ -152,7 +145,7 @@ func TestPackage_AddFile(t *testing.T) {
 	// Index 1. Append generic file from absolute path
 	err = pkg.AddFile(
 		fileType,
-		PackageFile{Dest: "/tmp/test2.yml", Src: "/tmp/temp.yml"},
+		file{Dest: "/tmp/test2.yml", Src: "/tmp/temp.yml"},
 	)
 	a.NoError(err)
 
@@ -162,9 +155,10 @@ func TestPackage_AddFile(t *testing.T) {
 	// Index 2. Append generic file from empty source with body
 	err = pkg.AddFile(
 		fileType,
-		PackageFile{Dest: "/tmp/test3.yml", Body: `test: test data`},
+		file{Dest: "/tmp/test3.yml", Body: `test: test data`},
 	)
 	a.NoError(err)
 
 	a.Equal("", pkg.Files[fileType][2].Src)
 }
+*/

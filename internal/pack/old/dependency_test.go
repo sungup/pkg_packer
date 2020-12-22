@@ -1,8 +1,9 @@
-package info
+package old
 
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/sungup/pkg_packer/internal/pack"
 	"gopkg.in/yaml.v3"
 	"testing"
 )
@@ -32,7 +33,7 @@ func TestDependency_UnmarshalYAML(t *testing.T) {
 
 		input := fmt.Sprintf(format, expectedPkg, expectedOp, expectedVer)
 		tested := struct {
-			Dep Dependency `yaml:"dep"`
+			Dep pack.Dependency `yaml:"dep"`
 		}{}
 
 		a.NoError(yaml.Unmarshal([]byte(input), &tested))

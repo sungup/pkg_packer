@@ -2,7 +2,7 @@ package builder
 
 import (
 	"fmt"
-	"github.com/sungup/pkg_packer/internal/info"
+	"github.com/sungup/pkg_packer/internal/pack"
 	"github.com/sungup/pkg_packer/pkg/debpack"
 	"io"
 )
@@ -10,7 +10,7 @@ import (
 type DEBBuilder struct {
 	PackageBuilder
 
-	pkgInfo *info.Package
+	pkgInfo *pack.Package
 
 	// conffiles is a contents containing the list of config file should keep.
 	conffiles []string
@@ -21,7 +21,7 @@ type DEBBuilder struct {
 //  - conffile file
 //  - md5sums file
 
-func (deb *DEBBuilder) metadata(meta info.PackageMeta) debpack.DEBMetaData {
+func (deb *DEBBuilder) metadata(meta pack.PackageMeta) debpack.DEBMetaData {
 	return debpack.DEBMetaData{
 		Package:      meta.Name,
 		Version:      meta.Version,
@@ -33,7 +33,7 @@ func (deb *DEBBuilder) metadata(meta info.PackageMeta) debpack.DEBMetaData {
 	}
 }
 
-func (deb *DEBBuilder) dirToDEBFile(info info.PackageDir) debpack.DEBFile {
+func (deb *DEBBuilder) dirToDEBFile(info pack.packageDir) debpack.DEBFile {
 	return debpack.DEBFile{
 		Name:  info.Dest,
 		Mode:  info.Mode + 040000,
@@ -43,7 +43,7 @@ func (deb *DEBBuilder) dirToDEBFile(info info.PackageDir) debpack.DEBFile {
 	}
 }
 
-func (deb *DEBBuilder) fileToDEBFile(typeName string, info info.PackageFile) (debpack.DEBFile, error) {
+func (deb *DEBBuilder) fileToDEBFile(typeName string, info pack.packageFile) (debpack.DEBFile, error) {
 	fileType := debpack.GenericFile
 
 	// string to type
@@ -166,7 +166,7 @@ func (deb *DEBBuilder) Build(writer io.Writer) error {
 	return debPack.Write(writer)
 }
 
-func NewDEBBuilder(pkgInfo *info.Package) PackageBuilder {
+func NewDEBBuilder(pkgInfo *pack.Package) PackageBuilder {
 	return &DEBBuilder{
 		pkgInfo: pkgInfo,
 	}
