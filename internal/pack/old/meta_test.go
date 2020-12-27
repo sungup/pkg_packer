@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func compareMetaData(t *testing.T, expect map[string]string, tested *pack.PackageMeta) {
+func compareMetaData(t *testing.T, expect map[string]string, tested *pack.Meta) {
 	assert := Assert.New(t)
 
 	assert.Equal(expect["name"], tested.Name)

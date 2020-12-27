@@ -14,7 +14,7 @@ type RPMBuilder struct {
 	pkgInfo *pack.Package
 }
 
-func (rpm *RPMBuilder) rpmMetadata(meta pack.PackageMeta) rpmpack.RPMMetaData {
+func (rpm *RPMBuilder) rpmMetadata(meta pack.Meta) rpmpack.RPMMetaData {
 	return rpmpack.RPMMetaData{
 		Name:        meta.Name,
 		Summary:     meta.Summary,
@@ -41,7 +41,7 @@ func (rpm *RPMBuilder) rpmMetadata(meta pack.PackageMeta) rpmpack.RPMMetaData {
 	}
 }
 
-func (rpm *RPMBuilder) dirToRPMFile(info pack.packageDir) rpmpack.RPMFile {
+func (rpm *RPMBuilder) dirToRPMFile(info pack.Directory) rpmpack.RPMFile {
 	// Ignore MTime because the directories' modified time will be changed
 	// because of their contents in directory
 	return rpmpack.RPMFile{
@@ -52,7 +52,7 @@ func (rpm *RPMBuilder) dirToRPMFile(info pack.packageDir) rpmpack.RPMFile {
 	}
 }
 
-func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pack.packageFile) (rpmpack.RPMFile, error) {
+func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pack.File) (rpmpack.RPMFile, error) {
 	fileType := rpmpack.GenericFile
 
 	// string to type
@@ -90,11 +90,11 @@ func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pack.packageFile) (rp
 
 	return rpmpack.RPMFile{
 		Name:  info.Dest,
-		Body:  info.FileData(),
-		Mode:  info.FileMode(),
+		Body:  info.Body(),
+		Mode:  info.Mode,
 		Owner: info.Owner,
 		Group: info.Group,
-		MTime: uint32(info.FileMTime().Unix()),
+		MTime: uint32(info.MTime.Unix()),
 		Type:  fileType,
 	}, nil
 }
@@ -135,13 +135,13 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 
 	// 1. add directory list
 	for _, dir := range rpm.pkgInfo.Dirs {
-		rpmPack.AddFile(rpm.dirToRPMFile(dir))
+		rpmPack.AddFile(rpm.dirToRPMFile(*dir))
 	}
 
 	// 2. add files
 	for typeName, fList := range rpm.pkgInfo.Files {
 		for _, fItem := range fList {
-			if rpmFile, err := rpm.fileToRPMFile(typeName, fItem); err == nil {
+			if rpmFile, err := rpm.fileToRPMFile(typeName, *fItem); err == nil {
 				rpmPack.AddFile(rpmFile)
 			} else {
 				return err
@@ -150,10 +150,10 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 	}
 
 	// 3. add prein/postin/preun/postun
-	rpmPack.AddPrein(rpm.pkgInfo.PreInScript())
-	rpmPack.AddPostin(rpm.pkgInfo.PostInScript())
-	rpmPack.AddPreun(rpm.pkgInfo.PreUnScript())
-	rpmPack.AddPostun(rpm.pkgInfo.PostUnScript())
+	rpmPack.AddPrein(rpm.pkgInfo.PreIn.String())
+	rpmPack.AddPostin(rpm.pkgInfo.PostIn.String())
+	rpmPack.AddPreun(rpm.pkgInfo.PreUn.String())
+	rpmPack.AddPostun(rpm.pkgInfo.PostUn.String())
 
 	// 4. add dependencies
 	for _, dependency := range rpm.pkgInfo.Dependencies {

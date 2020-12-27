@@ -76,7 +76,8 @@ func main() {
 	args := argParse()
 
 	// 1. load yaml file
-	pkgInfo, err := pack.LoadPkgInfo(args.yamlPath, args.srcDir)
+	pack.UpdateSourceDir(args.srcDir)
+	pkgInfo, err := pack.LoadPkgInfo(args.yamlPath)
 
 	if err != nil {
 		log.Fatal(err)

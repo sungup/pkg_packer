@@ -9,17 +9,19 @@ import (
 	"time"
 )
 
-var (
-	sourceHome string
-)
+var srcHome string
 
-func UpdateSourceDir(dir string) {
-	sourceHome = dir
+func UpdateSourceDir(dir string) string {
+	orig := srcHome
+
+	srcHome = dir
+
+	return orig
 }
 
 func absSourcePath(filepath string) string {
 	if filepath != "" && !strings.HasPrefix(filepath, "/") {
-		return path.Join(sourceHome, filepath)
+		return path.Join(srcHome, filepath)
 	} else {
 		return filepath
 	}
@@ -34,107 +36,65 @@ func init() {
 }
 
 type Package struct {
-	Meta PackageMeta `yaml:"meta"`
+	Meta Meta `yaml:"meta"`
 
-	Dirs  []directory       `yaml:"directory"`
-	Files map[string][]file `yaml:"files"`
+	Dirs  []*Directory       `yaml:"directory"`
+	Files map[string][]*File `yaml:"files"`
 
-	PreIn  []string `yaml:"prein"`
-	PostIn []string `yaml:"postin"`
+	PreIn  Script `yaml:"prein"`
+	PostIn Script `yaml:"postin"`
 
-	PreUn  []string `yaml:"preun"`
-	PostUn []string `yaml:"postun"`
+	PreUn  Script `yaml:"preun"`
+	PostUn Script `yaml:"postun"`
 
-	Dependencies []Relation `yaml:"dependencies"`
-
-	srcHome string
-}
-
-// Setters
-func (pkg *Package) AppendPreIn(script string) {
-	pkg.PreIn = append(pkg.PreIn, script+";")
-}
-
-func (pkg *Package) AppendPostIn(script string) {
-	pkg.PostIn = append(pkg.PostIn, script+";")
-}
-
-func (pkg *Package) AppendPreUn(script string) {
-	pkg.PreUn = append(pkg.PreUn, script+";")
-}
-
-func (pkg *Package) AppendPostUn(script string) {
-	pkg.PostUn = append(pkg.PostUn, script+";")
-}
-
-// Getter
-func (pkg *Package) PreInScript() string {
-	return strings.Join(pkg.PreIn, "\n")
-}
-
-func (pkg *Package) PostInScript() string {
-	return strings.Join(pkg.PostIn, "\n")
-}
-
-func (pkg *Package) PreUnScript() string {
-	return strings.Join(pkg.PreUn, "\n")
-}
-
-func (pkg *Package) PostUnScript() string {
-	return strings.Join(pkg.PostUn, "\n")
+	Dependencies []*Relation `yaml:"dependencies"`
 }
 
 func (pkg *Package) init() {
 	pkg.Meta.UpdateBuildTime(time.Now().UTC())
 }
 
-func (pkg *Package) AddDirectory(pkgDir directory) {
+func (pkg *Package) AddDirectory(pkgDir *Directory) {
 	pkg.Dirs = append(pkg.Dirs, pkgDir)
 }
 
-func (pkg *Package) AddFile(fileType string, pkgFile file) error {
+func (pkg *Package) AddFile(fileType string, pkgFile *File) error {
 	// TODO check file type
 	pkg.Files[fileType] = append(pkg.Files[fileType], pkgFile)
 
 	return nil
 }
 
-func LoadPkgInfo(filepath string, srcHome string) (*Package, error) {
-	buffer, err := ioutil.ReadFile(filepath)
+func LoadPkgInfo(filepath string) (*Package, error) {
+	var (
+		buffer []byte
+		err    error
 
-	if err != nil {
+		pkg = new(Package)
+	)
+
+	if buffer, err = ioutil.ReadFile(filepath); err != nil {
 		return nil, err
 	}
 
-	pkg := new(Package)
-
-	if err := yaml.Unmarshal(buffer, pkg); err != nil {
+	if err = yaml.Unmarshal(buffer, pkg); err != nil {
 		return nil, err
 	}
-
-	pkg.srcHome = srcHome
 
 	pkg.init()
 
 	return pkg, nil
 }
 
-func NewPackage(meta PackageMeta, srcHome string) *Package {
+func NewPackage(meta Meta) *Package {
 	pkg := new(Package)
 
 	pkg.Meta = meta
 
-	pkg.Dirs = make([]directory, 0)
-	pkg.Files = make(map[string][]file)
+	pkg.Dirs = make([]*Directory, 0)
+	pkg.Files = make(map[string][]*File)
 
-	pkg.PreIn = make([]string, 0)
-	pkg.PostIn = make([]string, 0)
-	pkg.PreUn = make([]string, 0)
-	pkg.PostUn = make([]string, 0)
-
-	pkg.Dependencies = make([]Relation, 0)
-
-	pkg.srcHome = srcHome
+	pkg.Dependencies = make([]*Relation, 0)
 
 	pkg.init()
 

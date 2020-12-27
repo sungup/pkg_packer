@@ -22,7 +22,7 @@ const (
 	errSourceFileIsDir    = "file loading failed: %s is a directory"
 )
 
-type file struct {
+type File struct {
 	Dest  string    `yaml:"dest"`
 	Owner string    `yaml:"owner"`
 	Group string    `yaml:"group"`
@@ -32,11 +32,11 @@ type file struct {
 	body []byte
 }
 
-func (f *file) Body() []byte {
+func (f *File) Body() []byte {
 	return f.body
 }
 
-func (f *file) load(source string) error {
+func (f *File) load(source string) error {
 	// to absolute path
 	source = absSourcePath(source)
 
@@ -59,8 +59,8 @@ func (f *file) load(source string) error {
 	return nil
 }
 
-func (f *file) UnmarshalYAML(value *yaml.Node) error {
-	type tT file
+func (f *File) UnmarshalYAML(value *yaml.Node) error {
+	type tT File
 	tV := struct {
 		tT     `yaml:",inline"`
 		Source string `yaml:"source"`
@@ -80,7 +80,7 @@ func (f *file) UnmarshalYAML(value *yaml.Node) error {
 		return fmt.Errorf(errYAMLDecodingFailed, err)
 	}
 
-	tF := file(tV.tT)
+	tF := File(tV.tT)
 
 	// 1. check empty body
 	if tF.Dest == "" {
@@ -105,8 +105,8 @@ func (f *file) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-func LoadFile(source string, dest, owner, group string) (*file, error) {
-	f := file{
+func LoadFile(source string, dest, owner, group string) (*File, error) {
+	f := File{
 		Dest:  dest,
 		Owner: owner,
 		Group: group,
@@ -123,12 +123,12 @@ func LoadFile(source string, dest, owner, group string) (*file, error) {
 	}
 }
 
-func NewFile(body string, dest, owner, group string, mode uint) (*file, error) {
+func NewFile(body string, dest, owner, group string, mode uint) (*File, error) {
 	if dest == "" {
 		return nil, fmt.Errorf(errEmptyDestination)
 	}
 
-	return &file{
+	return &File{
 		Dest:  dest,
 		Mode:  mode,
 		Owner: owner,
@@ -138,19 +138,19 @@ func NewFile(body string, dest, owner, group string, mode uint) (*file, error) {
 	}, nil
 }
 
-type directory struct {
+type Directory struct {
 	Dest  string `yaml:"dest,omitempty"`
 	Owner string `yaml:"owner"`
 	Group string `yaml:"group"`
 	Mode  uint   `yaml:"mode"`
 }
 
-func NewDirectory(dest, owner, group string, mode uint) (*directory, error) {
+func NewDirectory(dest, owner, group string, mode uint) (*Directory, error) {
 	if dest == "" {
 		return nil, fmt.Errorf("empty destination path")
 	}
 
-	return &directory{
+	return &Directory{
 		Dest:  dest,
 		Owner: owner,
 		Group: group,

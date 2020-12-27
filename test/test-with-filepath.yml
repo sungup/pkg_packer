@@ -42,14 +42,15 @@ files:
       owner: root
       group: root
 prein:
-  - echo Hello World!;
+  body: echo Hello World!;
 postin:
-  - echo See you later World!;
+  body: echo See you later World!;
 preun:
-  - echo Hello World again!;
+  body: echo Hello World again!;
 postun:
-  - echo Bye World.
-  - echo Bless your future;
+  body: |
+    echo Bye World.
+    echo Bless your future;
 dependencies:
   - kernel>=3.10.0-1062
 # Following block is used for the testing

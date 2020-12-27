@@ -21,7 +21,7 @@ type DEBBuilder struct {
 //  - conffile file
 //  - md5sums file
 
-func (deb *DEBBuilder) metadata(meta pack.PackageMeta) debpack.DEBMetaData {
+func (deb *DEBBuilder) metadata(meta pack.Meta) debpack.DEBMetaData {
 	return debpack.DEBMetaData{
 		Package:      meta.Name,
 		Version:      meta.Version,
@@ -33,7 +33,7 @@ func (deb *DEBBuilder) metadata(meta pack.PackageMeta) debpack.DEBMetaData {
 	}
 }
 
-func (deb *DEBBuilder) dirToDEBFile(info pack.packageDir) debpack.DEBFile {
+func (deb *DEBBuilder) dirToDEBFile(info pack.Directory) debpack.DEBFile {
 	return debpack.DEBFile{
 		Name:  info.Dest,
 		Mode:  info.Mode + 040000,
@@ -43,7 +43,7 @@ func (deb *DEBBuilder) dirToDEBFile(info pack.packageDir) debpack.DEBFile {
 	}
 }
 
-func (deb *DEBBuilder) fileToDEBFile(typeName string, info pack.packageFile) (debpack.DEBFile, error) {
+func (deb *DEBBuilder) fileToDEBFile(typeName string, info pack.File) (debpack.DEBFile, error) {
 	fileType := debpack.GenericFile
 
 	// string to type
@@ -85,11 +85,11 @@ func (deb *DEBBuilder) fileToDEBFile(typeName string, info pack.packageFile) (de
 
 	return debpack.DEBFile{
 		Name:  info.Dest,
-		Body:  info.FileData(),
-		Mode:  info.FileMode(),
+		Body:  info.Body(),
+		Mode:  info.Mode,
 		Owner: info.Owner,
 		Group: info.Group,
-		MTime: info.FileMTime(),
+		MTime: info.MTime,
 		Type:  fileType,
 	}, nil
 }
@@ -139,12 +139,12 @@ func (deb *DEBBuilder) Build(writer io.Writer) error {
 	}
 
 	for _, dir := range deb.pkgInfo.Dirs {
-		debPack.AddFile(deb.dirToDEBFile(dir))
+		debPack.AddFile(deb.dirToDEBFile(*dir))
 	}
 
 	for typeName, fList := range deb.pkgInfo.Files {
 		for _, file := range fList {
-			if debFile, err := deb.fileToDEBFile(typeName, file); err == nil {
+			if debFile, err := deb.fileToDEBFile(typeName, *file); err == nil {
 				debPack.AddFile(debFile)
 			} else {
 				return err
@@ -152,10 +152,10 @@ func (deb *DEBBuilder) Build(writer io.Writer) error {
 		}
 	}
 
-	debPack.AddPrein(deb.pkgInfo.PreInScript())
-	debPack.AddPostin(deb.pkgInfo.PostInScript())
-	debPack.AddPreun(deb.pkgInfo.PreUnScript())
-	debPack.AddPostun(deb.pkgInfo.PostUnScript())
+	debPack.AddPrein(deb.pkgInfo.PreIn.String())
+	debPack.AddPostin(deb.pkgInfo.PostIn.String())
+	debPack.AddPreun(deb.pkgInfo.PreUn.String())
+	debPack.AddPostun(deb.pkgInfo.PostUn.String())
 
 	for _, dependency := range deb.pkgInfo.Dependencies {
 		if err := debPack.Depends.Set(dependency.DebFormat()); err != nil {

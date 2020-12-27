@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"time"
 )
 
 func writeToDir(dir string, pkgBuilder builder.PackageBuilder) {
@@ -37,7 +36,7 @@ func writeToDir(dir string, pkgBuilder builder.PackageBuilder) {
 }
 
 func apiSample() {
-	pkgInfo := pack.NewPackage(pack.PackageMeta{
+	pkgInfo := pack.NewPackage(pack.Meta{
 		Name:        "rpmpack-test",
 		Version:     "0.0.1-1",
 		Release:     "el7",
@@ -48,32 +47,24 @@ func apiSample() {
 		Vendor:      "",
 		URL:         "",
 		License:     "",
-	}, ".")
-
-	pkgInfo.AddDirectory(pack.packageDir{
-		Dest:  "/var/lib/pkg-packer-api-sample",
-		Mode:  0755,
-		Owner: "root",
-		Group: "root",
 	})
 
-	_ = pkgInfo.AddFile("config", pack.packageFile{
-		Dest:  "/var/lib/pkg-packer-api-sample/sample1.ini",
-		Body:  `[test]\nvalue="Hello api-sample log file!"`,
-		Mode:  0644,
-		Owner: "root",
-		Group: "root",
-		MTime: time.Now(),
-	})
+	dir, _ := pack.NewDirectory("/var/lib/pkg-packer-api-sample", "root", "root", 0755)
+	pkgInfo.AddDirectory(dir)
 
-	_ = pkgInfo.AddFile("generic", pack.packageFile{
-		Dest:  "/var/lib/pkg-packer-api-sample/sample2.sh",
-		Body:  "#!/bin/bash\necho Hello api-sample log file!\n",
-		Mode:  0755,
-		Owner: "root",
-		Group: "root",
-		MTime: time.Now(),
-	})
+	file, _ := pack.NewFile(
+		`[test]\nvalue="Hello api-sample log file!"`,
+		"/var/lib/pkg-packer-api-sample/sample1.ini",
+		"root", "root", 0644,
+	)
+	_ = pkgInfo.AddFile("config", file)
+
+	file, _ = pack.NewFile(
+		"#!/bin/bash\necho Hello api-sample log file!\n",
+		"/var/lib/pkg-packer-api-sample/sample2.sh",
+		"root", "root", 0755,
+	)
+	_ = pkgInfo.AddFile("generic", file)
 
 	rpmBuilder := builder.NewRPMBuilder(pkgInfo)
 	writeToDir("temp", rpmBuilder)
@@ -83,7 +74,7 @@ func apiSample() {
 }
 
 func yamlSample(yamlPath string) {
-	pkgInfo, err := pack.LoadPkgInfo(yamlPath, ".")
+	pkgInfo, err := pack.LoadPkgInfo(yamlPath)
 	if err != nil {
 		log.Fatal(err)
 	}

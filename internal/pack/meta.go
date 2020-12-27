@@ -2,7 +2,7 @@ package pack
 
 import "time"
 
-type PackageMeta struct {
+type Meta struct {
 	Name    string `yaml:"name,omitempty"`
 	Version string `yaml:"version,omitempty"`
 	Release string `yaml:"release,omitempty"`
@@ -23,10 +23,10 @@ type PackageMeta struct {
 	// TODO add requires
 }
 
-func (meta *PackageMeta) BuildTime() time.Time {
+func (meta *Meta) BuildTime() time.Time {
 	return meta.buildTime.UTC()
 }
 
-func (meta *PackageMeta) UpdateBuildTime(buildTime time.Time) {
+func (meta *Meta) UpdateBuildTime(buildTime time.Time) {
 	meta.buildTime = buildTime
 }

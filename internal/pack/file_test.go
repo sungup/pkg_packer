@@ -20,7 +20,7 @@ func TestFile_load(t *testing.T) {
 	a := assert.New(t)
 
 	now := time.Now()
-	tested := file{
+	tested := File{
 		MTime: now,
 	}
 
@@ -54,7 +54,7 @@ func TestFile_UnmarshalYAML(t *testing.T) {
 	a := assert.New(t)
 
 	now := time.Now()
-	tested := file{
+	tested := File{
 		MTime: now,
 	}
 
@@ -100,7 +100,7 @@ func TestFile_UnmarshalYAML(t *testing.T) {
 	a.NotEqual(defaultGroup, tested.Group)
 
 	// 5. check minimal body
-	tested = file{
+	tested = File{
 		MTime: now,
 	}
 	yml = genYml(expectedDest, "", string(testBody), testMode)
