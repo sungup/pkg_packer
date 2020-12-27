@@ -155,6 +155,15 @@ func TestRelation_DebFormat(t *testing.T) {
 func TestNewRelation(t *testing.T) {
 	a := assert.New(t)
 
+	{
+		tested, err := NewRelation(expectedPkg)
+		a.NotNil(tested)
+		a.NoError(err)
+		a.Equal(expectedPkg, tested.name)
+		a.Empty(tested.ver)
+		a.Empty(tested.op)
+	}
+
 	for _, tc := range invalidOps {
 		tested, err := NewRelation(fmt.Sprintf("%s %s %s", expectedPkg, tc, expectedVer))
 		a.Nil(tested)
