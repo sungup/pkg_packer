@@ -16,6 +16,10 @@ func TestFile_Body(t *testing.T) {
 	// ignore testcase
 }
 
+func TestFile_SetBody(t *testing.T) {
+	// ignore testcase
+}
+
 func TestFile_load(t *testing.T) {
 	a := assert.New(t)
 

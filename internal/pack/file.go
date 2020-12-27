@@ -36,6 +36,10 @@ func (f *File) Body() []byte {
 	return f.body
 }
 
+func (f *File) SetBody(body []byte) {
+	f.body = body
+}
+
 func (f *File) load(source string) error {
 	// to absolute path
 	source = absSourcePath(source)

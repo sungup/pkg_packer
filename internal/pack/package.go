@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 var srcHome string
@@ -36,22 +35,18 @@ func init() {
 }
 
 type Package struct {
-	Meta Meta `yaml:"meta"`
+	Meta `yaml:"meta"`
 
 	Dirs  []*Directory       `yaml:"directory"`
 	Files map[string][]*File `yaml:"files"`
 
-	PreIn  Script `yaml:"prein"`
-	PostIn Script `yaml:"postin"`
+	PreIn  script `yaml:"prein"`
+	PostIn script `yaml:"postin"`
 
-	PreUn  Script `yaml:"preun"`
-	PostUn Script `yaml:"postun"`
+	PreUn  script `yaml:"preun"`
+	PostUn script `yaml:"postun"`
 
 	Dependencies []*Relation `yaml:"dependencies"`
-}
-
-func (pkg *Package) init() {
-	pkg.Meta.UpdateBuildTime(time.Now().UTC())
 }
 
 func (pkg *Package) AddDirectory(pkgDir *Directory) {
@@ -81,8 +76,6 @@ func LoadPkgInfo(filepath string) (*Package, error) {
 		return nil, err
 	}
 
-	pkg.init()
-
 	return pkg, nil
 }
 
@@ -95,8 +88,6 @@ func NewPackage(meta Meta) *Package {
 	pkg.Files = make(map[string][]*File)
 
 	pkg.Dependencies = make([]*Relation, 0)
-
-	pkg.init()
 
 	return pkg
 }

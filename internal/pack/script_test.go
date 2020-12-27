@@ -13,7 +13,7 @@ import (
 func TestScript_load(t *testing.T) {
 	a := assert.New(t)
 
-	tested := Script("")
+	tested := script("")
 
 	// temporary change ownership to raise permission denied
 	notReadable, _ := test.GetTestFilePath("internal.pack/not-readable")
@@ -49,7 +49,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 
 	// 0. invalid yaml format
 	{
-		tested := Script("")
+		tested := script("")
 
 		a.Error(yaml.Unmarshal([]byte("hello world"), &tested))
 		a.Empty(tested)
@@ -58,7 +58,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 	// 1. Test normal body loading
 	// 1-1. empty yaml
 	{
-		tested := Script("")
+		tested := script("")
 
 		a.NoError(yaml.Unmarshal([]byte(""), &tested))
 		a.Empty(tested)
@@ -66,7 +66,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 
 	// 1-2. filled body
 	{
-		tested := Script("")
+		tested := script("")
 		yamlBody, _ := yaml.Marshal(exampleStruct)
 
 		a.NoError(yaml.Unmarshal(yamlBody, &tested))
@@ -76,7 +76,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 	// 2. Test file loading
 	// 2-1. invalid path loading
 	{
-		tested := Script("")
+		tested := script("")
 		exampleStruct.Source = "internal.pack/dir-file"
 		yamlBody, _ := yaml.Marshal(exampleStruct)
 
@@ -86,7 +86,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 
 	// 2-2. valid path loading
 	{
-		tested := Script("")
+		tested := script("")
 
 		source := "internal.pack/example.sh"
 		expectedLoaded, _ := test.LoadTestFile(source)
@@ -109,7 +109,7 @@ func TestScript_Append(t *testing.T) {
 	expectedBody := string(buffer)
 	expectedBody = strings.Join(append([]string{expectedBody}, loremIpsum...), "\n") + "\n"
 
-	tested := Script("")
+	tested := script("")
 	a.NoError(tested.load(tcFile))
 
 	for _, line := range loremIpsum {
@@ -120,9 +120,9 @@ func TestScript_Append(t *testing.T) {
 }
 
 func TestScript_String(t *testing.T) {
-	// ignore this case because Script.String is a type conversion simple getter
+	// ignore this case because script.String is a type conversion simple getter
 }
 
 func TestScript_Bytes(t *testing.T) {
-	// ignore this case because Script.Bytes is a type conversion simple getter
+	// ignore this case because script.Bytes is a type conversion simple getter
 }

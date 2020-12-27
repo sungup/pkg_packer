@@ -89,10 +89,10 @@ func (r *Relation) DebFormat() string {
 	return fmt.Sprintf("%s%s", r.name, ver)
 }
 
-func NewRelation(relation string) (*Relation, error) {
+func NewRelation(info string) (*Relation, error) {
 	var r Relation
 
-	if err := r.parse(relation); err != nil {
+	if err := r.parse(info); err != nil {
 		return nil, err
 	} else {
 		return &r, nil
