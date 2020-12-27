@@ -33,7 +33,7 @@ func TestDependency_UnmarshalYAML(t *testing.T) {
 
 		input := fmt.Sprintf(format, expectedPkg, expectedOp, expectedVer)
 		tested := struct {
-			Dep pack.Dependency `yaml:"dep"`
+			Dep pack.Relation `yaml:"dep"`
 		}{}
 
 		a.NoError(yaml.Unmarshal([]byte(input), &tested))
