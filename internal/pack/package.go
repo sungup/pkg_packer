@@ -1,11 +1,28 @@
 package pack
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
+)
+
+type FileType string
+
+const (
+	GenericFile   = FileType("generic")
+	ConfigFile    = FileType("config")
+	DocumentFile  = FileType("doc")
+	NotUseFile    = FileType("not_use")
+	MissingOkFile = FileType("missing_ok")
+	NoReplaceFile = FileType("no_replace")
+	SpecFile      = FileType("spec")
+	GhostFile     = FileType("ghost")
+	LicenseFile   = FileType("license")
+	ReadMeFile    = FileType("readme")
+	ExcludeFile   = FileType("exclude")
 )
 
 var srcHome string
@@ -37,8 +54,8 @@ func init() {
 type Package struct {
 	Meta `yaml:"meta"`
 
-	Dirs  []*Directory       `yaml:"directory"`
-	Files map[string][]*File `yaml:"files"`
+	Dirs  []*Directory         `yaml:"directory"`
+	Files map[FileType][]*File `yaml:"files"`
 
 	PreIn  script `yaml:"prein"`
 	PostIn script `yaml:"postin"`
@@ -53,7 +70,7 @@ func (pkg *Package) AddDirectory(pkgDir *Directory) {
 	pkg.Dirs = append(pkg.Dirs, pkgDir)
 }
 
-func (pkg *Package) AddFile(fileType string, pkgFile *File) error {
+func (pkg *Package) AddFile(fileType FileType, pkgFile *File) error {
 	// TODO check file type
 	pkg.Files[fileType] = append(pkg.Files[fileType], pkgFile)
 
@@ -69,12 +86,14 @@ func LoadPkgInfo(filepath string) (*Package, error) {
 	)
 
 	if buffer, err = ioutil.ReadFile(filepath); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("loading package recipe file at %s: %w", filepath, err)
 	}
 
 	if err = yaml.Unmarshal(buffer, pkg); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unexpected recipe file format: %w", err)
 	}
+
+	// TODO check file type in Files map
 
 	return pkg, nil
 }
@@ -85,7 +104,7 @@ func NewPackage(meta Meta) *Package {
 	pkg.Meta = meta
 
 	pkg.Dirs = make([]*Directory, 0)
-	pkg.Files = make(map[string][]*File)
+	pkg.Files = make(map[FileType][]*File)
 
 	pkg.Dependencies = make([]*Relation, 0)
 

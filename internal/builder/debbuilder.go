@@ -43,7 +43,7 @@ func (deb *DEBBuilder) dirToDEBFile(info pack.Directory) debpack.DEBFile {
 	}
 }
 
-func (deb *DEBBuilder) fileToDEBFile(typeName string, info pack.File) (debpack.DEBFile, error) {
+func (deb *DEBBuilder) fileToDEBFile(typeName pack.FileType, info pack.File) (debpack.DEBFile, error) {
 	fileType := debpack.GenericFile
 
 	// string to type

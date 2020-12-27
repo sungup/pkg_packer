@@ -31,7 +31,7 @@ func (rpm *RPMBuilder) rpmMetadata(meta pack.Meta) rpmpack.RPMMetaData {
 		BuildHost:   "",
 		Compressor:  "",
 		Epoch:       0,
-		BuildTime:   meta.BuildTime(),
+		BuildTime:   meta.UTCBuildTime(),
 		Provides:    nil,
 		Obsoletes:   nil,
 		Suggests:    nil,
@@ -52,7 +52,7 @@ func (rpm *RPMBuilder) dirToRPMFile(info pack.Directory) rpmpack.RPMFile {
 	}
 }
 
-func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pack.File) (rpmpack.RPMFile, error) {
+func (rpm *RPMBuilder) fileToRPMFile(typeName pack.FileType, info pack.File) (rpmpack.RPMFile, error) {
 	fileType := rpmpack.GenericFile
 
 	// string to type
@@ -85,7 +85,7 @@ func (rpm *RPMBuilder) fileToRPMFile(typeName string, info pack.File) (rpmpack.R
 
 	default:
 		return rpmpack.RPMFile{},
-			errors.New("unexpected file type: " + typeName)
+			errors.New("unexpected file type: " + string(typeName))
 	}
 
 	return rpmpack.RPMFile{
