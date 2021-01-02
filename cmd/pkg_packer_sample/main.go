@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"github.com/sungup/pkg_packer/internal/builder"
-	"github.com/sungup/pkg_packer/internal/pack"
+	"github.com/sungup/pkg_packer/pkg/info"
 	"log"
 	"os"
 	"path"
@@ -36,7 +36,7 @@ func writeToDir(dir string, pkgBuilder builder.PackageBuilder) {
 }
 
 func apiSample() {
-	pkgInfo := pack.NewPackage(pack.Meta{
+	pkgInfo := info.NewPackage(info.Meta{
 		Name:        "rpmpack-test",
 		Version:     "0.0.1-1",
 		Release:     "el7",
@@ -49,22 +49,22 @@ func apiSample() {
 		License:     "",
 	})
 
-	dir, _ := pack.NewDirectory("/var/lib/pkg-packer-api-sample", "root", "root", 0755)
+	dir, _ := info.NewDirectory("/var/lib/pkg-packer-api-sample", "root", "root", 0755)
 	pkgInfo.AddDirectory(dir)
 
-	file, _ := pack.NewFile(
+	file, _ := info.NewFile(
 		`[test]\nvalue="Hello api-sample log file!"`,
 		"/var/lib/pkg-packer-api-sample/sample1.ini",
 		"root", "root", 0644,
 	)
-	_ = pkgInfo.AddFile("config", file)
+	_ = pkgInfo.AddFile(info.ConfigFile, file)
 
-	file, _ = pack.NewFile(
+	file, _ = info.NewFile(
 		"#!/bin/bash\necho Hello api-sample log file!\n",
 		"/var/lib/pkg-packer-api-sample/sample2.sh",
 		"root", "root", 0755,
 	)
-	_ = pkgInfo.AddFile("generic", file)
+	_ = pkgInfo.AddFile(info.GenericFile, file)
 
 	rpmBuilder := builder.NewRPMBuilder(pkgInfo)
 	writeToDir("temp", rpmBuilder)
@@ -74,7 +74,7 @@ func apiSample() {
 }
 
 func yamlSample(yamlPath string) {
-	pkgInfo, err := pack.LoadPkgInfo(yamlPath)
+	pkgInfo, err := info.LoadPkgInfo(yamlPath)
 	if err != nil {
 		log.Fatal(err)
 	}

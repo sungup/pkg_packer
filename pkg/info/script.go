@@ -1,4 +1,4 @@
-package pack
+package info
 
 import (
 	"fmt"
@@ -41,6 +41,10 @@ func (s *script) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+func (s script) MarshalYAML() (interface{}, error) {
+	return map[string]string{"body": string(s)}, nil
 }
 
 func (s *script) Append(line string) {

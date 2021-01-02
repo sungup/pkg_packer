@@ -48,7 +48,7 @@ func TestRPMBuilder_Build(t *testing.T) {
 	expected, tested := loadYAMLExpectAndPackage()
 
 	// 0. Sync the rpm file's build time
-	tested.Meta.UpdateBuildTime(test.ExpectFileDate.UTC())
+	tested.Meta.BuildTime = test.ExpectFileDate.UTC()
 
 	builder := NewRPMBuilder(tested)
 

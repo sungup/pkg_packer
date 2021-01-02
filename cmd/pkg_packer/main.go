@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"github.com/sungup/pkg_packer/internal/builder"
-	"github.com/sungup/pkg_packer/internal/pack"
+	"github.com/sungup/pkg_packer/pkg/info"
 	"log"
 	"os"
 	"path"
@@ -31,7 +31,7 @@ func argParse() PkgPackerArgs {
 	return args
 }
 
-type builderFunc func(*pack.Package) builder.PackageBuilder
+type builderFunc func(*info.Package) builder.PackageBuilder
 
 func (args *PkgPackerArgs) builders() []builderFunc {
 	switch args.pkgType {
@@ -76,8 +76,8 @@ func main() {
 	args := argParse()
 
 	// 1. load yaml file
-	pack.UpdateSourceDir(args.srcDir)
-	pkgInfo, err := pack.LoadPkgInfo(args.yamlPath)
+	info.UpdateSourceDir(args.srcDir)
+	pkgInfo, err := info.LoadPkgInfo(args.yamlPath)
 
 	if err != nil {
 		log.Fatal(err)

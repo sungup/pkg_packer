@@ -1,4 +1,4 @@
-package pack
+package info
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ func TestFile_load(t *testing.T) {
 	}
 
 	// temporary change ownership to raise permission denied
-	notReadable, _ := test.GetTestFilePath("internal.pack/not-readable")
+	notReadable, _ := test.GetTestFilePath("pkg.info/not-readable")
 	_ = os.Chmod(notReadable, 0000)
 	defer func() { _ = os.Chmod(notReadable, 0644) }()
 
@@ -37,12 +37,12 @@ func TestFile_load(t *testing.T) {
 	successTc := []string{"example.sh"}
 
 	for _, tc := range failTc {
-		a.Error(tested.load(path.Join("internal.pack", tc)))
+		a.Error(tested.load(path.Join("pkg.info", tc)))
 		a.Equal(now, tested.MTime)
 	}
 
 	for _, tc := range successTc {
-		tcFile := path.Join("internal.pack", tc)
+		tcFile := path.Join("pkg.info", tc)
 		expectedFile, _ := test.GetTestFilePath(tcFile)
 		expectedBody, _ := test.LoadTestFile(tcFile)
 		expectedStat, _ := os.Stat(expectedFile)
@@ -63,15 +63,23 @@ func TestFile_UnmarshalYAML(t *testing.T) {
 	}
 
 	genYml := func(dest, src, body string, mode uint) []byte {
+		srcYml, bodyYml := "", ""
+		if src != "" {
+			srcYml = fmt.Sprintf("source: %s\n", src)
+		}
+		if body != "" {
+			bodyYml = fmt.Sprintf("body: %s\n", body)
+		}
+
 		return []byte(fmt.Sprintf(
-			"dest: %s\nsource: %s\nbody: %s\nmode: %d\nowner: test\ngroup: test",
-			dest, src, body, mode,
+			"%s%sdest: %s\nmode: %d\nowner: test\ngroup: test",
+			srcYml, bodyYml, dest, mode,
 		))
 	}
 
 	expectedDest := "/usr/bin/helloworld"
-	expectedSrc := "internal.pack/example.sh"
-	invalidSrc := "internal.pack/dir-file"
+	expectedSrc := "pkg.info/example.sh"
+	invalidSrc := "pkg.info/dir-file"
 	testBody := []byte("Text Hello World!")
 	testMode := uint(0000)
 
@@ -121,15 +129,15 @@ func TestLoadFile(t *testing.T) {
 	a := assert.New(t)
 
 	// 1. check load fail
-	tested, err := LoadFile("internal.pack/not-exist", "dest", "owner", "group")
+	tested, err := LoadFile("pkg.info/not-exist", "dest", "owner", "group")
 	a.Nil(tested)
 	a.Error(err)
 
 	// 2. check normal load
-	tcFile, _ := test.GetTestFilePath("internal.pack/example.sh")
+	tcFile, _ := test.GetTestFilePath("pkg.info/example.sh")
 	expectedBody, _ := ioutil.ReadFile(tcFile)
 	expectedStat, _ := os.Stat(tcFile)
-	tested, err = LoadFile("internal.pack/example.sh", "dest", "owner", "group")
+	tested, err = LoadFile("pkg.info/example.sh", "dest", "owner", "group")
 	a.NotNil(tested)
 	a.NoError(err)
 	a.Equal(expectedBody, tested.body)

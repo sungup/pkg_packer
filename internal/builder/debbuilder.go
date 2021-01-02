@@ -2,15 +2,15 @@ package builder
 
 import (
 	"fmt"
-	"github.com/sungup/pkg_packer/internal/pack"
 	"github.com/sungup/pkg_packer/pkg/debpack"
+	"github.com/sungup/pkg_packer/pkg/info"
 	"io"
 )
 
 type DEBBuilder struct {
 	PackageBuilder
 
-	pkgInfo *pack.Package
+	pkgInfo *info.Package
 
 	// conffiles is a contents containing the list of config file should keep.
 	conffiles []string
@@ -21,7 +21,7 @@ type DEBBuilder struct {
 //  - conffile file
 //  - md5sums file
 
-func (deb *DEBBuilder) metadata(meta pack.Meta) debpack.DEBMetaData {
+func (deb *DEBBuilder) metadata(meta info.Meta) debpack.DEBMetaData {
 	return debpack.DEBMetaData{
 		Package:      meta.Name,
 		Version:      meta.Version,
@@ -33,7 +33,7 @@ func (deb *DEBBuilder) metadata(meta pack.Meta) debpack.DEBMetaData {
 	}
 }
 
-func (deb *DEBBuilder) dirToDEBFile(info pack.Directory) debpack.DEBFile {
+func (deb *DEBBuilder) dirToDEBFile(info info.Directory) debpack.DEBFile {
 	return debpack.DEBFile{
 		Name:  info.Dest,
 		Mode:  info.Mode + 040000,
@@ -43,7 +43,7 @@ func (deb *DEBBuilder) dirToDEBFile(info pack.Directory) debpack.DEBFile {
 	}
 }
 
-func (deb *DEBBuilder) fileToDEBFile(typeName pack.FileType, info pack.File) (debpack.DEBFile, error) {
+func (deb *DEBBuilder) fileToDEBFile(typeName string, info info.File) (debpack.DEBFile, error) {
 	fileType := debpack.GenericFile
 
 	// string to type
@@ -144,7 +144,7 @@ func (deb *DEBBuilder) Build(writer io.Writer) error {
 
 	for typeName, fList := range deb.pkgInfo.Files {
 		for _, file := range fList {
-			if debFile, err := deb.fileToDEBFile(typeName, *file); err == nil {
+			if debFile, err := deb.fileToDEBFile(typeName.String(), *file); err == nil {
 				debPack.AddFile(debFile)
 			} else {
 				return err
@@ -166,7 +166,7 @@ func (deb *DEBBuilder) Build(writer io.Writer) error {
 	return debPack.Write(writer)
 }
 
-func NewDEBBuilder(pkgInfo *pack.Package) PackageBuilder {
+func NewDEBBuilder(pkgInfo *info.Package) PackageBuilder {
 	return &DEBBuilder{
 		pkgInfo: pkgInfo,
 	}

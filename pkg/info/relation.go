@@ -1,4 +1,4 @@
-package pack
+package info
 
 import (
 	"fmt"
@@ -68,6 +68,14 @@ func (r *Relation) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return r.parse(verString)
+}
+
+func (r Relation) MarshalYAML() (interface{}, error) {
+	if r.op == opAny {
+		return r.name, nil
+	} else {
+		return fmt.Sprintf("%s%s%s", r.name, r.op, r.ver), nil
+	}
 }
 
 func (r *Relation) RpmFormat() string {

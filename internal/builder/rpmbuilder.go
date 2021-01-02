@@ -4,17 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/rpmpack"
-	"github.com/sungup/pkg_packer/internal/pack"
+	"github.com/sungup/pkg_packer/pkg/info"
 	"io"
 )
 
 type RPMBuilder struct {
 	PackageBuilder
 
-	pkgInfo *pack.Package
+	pkgInfo *info.Package
 }
 
-func (rpm *RPMBuilder) rpmMetadata(meta pack.Meta) rpmpack.RPMMetaData {
+func (rpm *RPMBuilder) rpmMetadata(meta info.Meta) rpmpack.RPMMetaData {
 	return rpmpack.RPMMetaData{
 		Name:        meta.Name,
 		Summary:     meta.Summary,
@@ -41,7 +41,7 @@ func (rpm *RPMBuilder) rpmMetadata(meta pack.Meta) rpmpack.RPMMetaData {
 	}
 }
 
-func (rpm *RPMBuilder) dirToRPMFile(info pack.Directory) rpmpack.RPMFile {
+func (rpm *RPMBuilder) dirToRPMFile(info info.Directory) rpmpack.RPMFile {
 	// Ignore MTime because the directories' modified time will be changed
 	// because of their contents in directory
 	return rpmpack.RPMFile{
@@ -52,7 +52,7 @@ func (rpm *RPMBuilder) dirToRPMFile(info pack.Directory) rpmpack.RPMFile {
 	}
 }
 
-func (rpm *RPMBuilder) fileToRPMFile(typeName pack.FileType, info pack.File) (rpmpack.RPMFile, error) {
+func (rpm *RPMBuilder) fileToRPMFile(typeName string, info info.File) (rpmpack.RPMFile, error) {
 	fileType := rpmpack.GenericFile
 
 	// string to type
@@ -141,7 +141,7 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 	// 2. add files
 	for typeName, fList := range rpm.pkgInfo.Files {
 		for _, fItem := range fList {
-			if rpmFile, err := rpm.fileToRPMFile(typeName, *fItem); err == nil {
+			if rpmFile, err := rpm.fileToRPMFile(typeName.String(), *fItem); err == nil {
 				rpmPack.AddFile(rpmFile)
 			} else {
 				return err
@@ -165,7 +165,7 @@ func (rpm *RPMBuilder) Build(writer io.Writer) error {
 	return rpmPack.Write(writer)
 }
 
-func NewRPMBuilder(pkgInfo *pack.Package) PackageBuilder {
+func NewRPMBuilder(pkgInfo *info.Package) PackageBuilder {
 	return &RPMBuilder{
 		pkgInfo: pkgInfo,
 	}

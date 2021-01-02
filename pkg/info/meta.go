@@ -1,4 +1,4 @@
-package pack
+package info
 
 import (
 	"fmt"
@@ -64,6 +64,7 @@ func (meta *Meta) UnmarshalYAML(value *yaml.Node) error {
 		return fmt.Errorf(errMetaDecodingFailed, err)
 	}
 
+	// check must set values
 	parsed := Meta(tV)
 	if err := parsed.checkMeta(); err != nil {
 		return err

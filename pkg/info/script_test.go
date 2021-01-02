@@ -1,4 +1,4 @@
-package pack
+package info
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -16,7 +16,7 @@ func TestScript_load(t *testing.T) {
 	tested := script("")
 
 	// temporary change ownership to raise permission denied
-	notReadable, _ := test.GetTestFilePath("internal.pack/not-readable")
+	notReadable, _ := test.GetTestFilePath("pkg.info/not-readable")
 	_ = os.Chmod(notReadable, 0000)
 	defer func() { _ = os.Chmod(notReadable, 0644) }()
 
@@ -24,12 +24,12 @@ func TestScript_load(t *testing.T) {
 	successTc := []string{"example.sh"}
 
 	for _, tc := range failTc {
-		a.Error(tested.load(path.Join("internal.pack", tc)))
+		a.Error(tested.load(path.Join("pkg.info", tc)))
 		a.Empty(tested)
 	}
 
 	for _, tc := range successTc {
-		tcFile := path.Join("internal.pack", tc)
+		tcFile := path.Join("pkg.info", tc)
 		expectedBody, _ := test.LoadTestFile(tcFile)
 		expectedBody = append(expectedBody, '\n')
 
@@ -77,7 +77,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 	// 2-1. invalid path loading
 	{
 		tested := script("")
-		exampleStruct.Source = "internal.pack/dir-file"
+		exampleStruct.Source = "pkg.info/dir-file"
 		yamlBody, _ := yaml.Marshal(exampleStruct)
 
 		a.Error(yaml.Unmarshal(yamlBody, &tested))
@@ -88,7 +88,7 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 	{
 		tested := script("")
 
-		source := "internal.pack/example.sh"
+		source := "pkg.info/example.sh"
 		expectedLoaded, _ := test.LoadTestFile(source)
 		expectedLoaded = append(expectedLoaded, '\n')
 
@@ -100,10 +100,25 @@ func TestScript_UnmarshalYAML(t *testing.T) {
 	}
 }
 
+func TestScript_MarshalYAML(t *testing.T) {
+	a := assert.New(t)
+
+	expectedBody := "echo hello world"
+	expectedYaml, _ := yaml.Marshal(map[string]string{"body": expectedBody})
+
+	testScript := script(expectedBody)
+	testedYaml, err := yaml.Marshal(&testScript)
+
+	a.NoError(err)
+	a.NotEqual(testScript, testedYaml)
+	a.Contains(string(testedYaml), testScript)
+	a.Equal(expectedYaml, testedYaml)
+}
+
 func TestScript_Append(t *testing.T) {
 	a := assert.New(t)
 
-	tcFile := path.Join("internal.pack", "example.sh")
+	tcFile := path.Join("pkg.info", "example.sh")
 
 	buffer, _ := test.LoadTestFile(tcFile)
 	expectedBody := string(buffer)
