@@ -153,7 +153,10 @@ func TestLoadPkgInfo(t *testing.T) {
 		buffer["files"] = map[string][]map[string]interface{}{name + "_unexpected": referenceFileList}
 		testFilePath, _ := test.GetTestFilePath(path.Join("temp", name+"_unexpected.yml"))
 		testFilePtr, _ := os.Create(testFilePath)
-		_ = yaml.NewEncoder(testFilePtr).Encode(buffer)
+		testEncoder := yaml.NewEncoder(testFilePtr)
+		_ = testEncoder.Encode(buffer)
+		_ = testEncoder.Close()
+		_ = testFilePtr.Close()
 
 		tested, err := LoadPkgInfo(testFilePath)
 		a.Nil(tested)
@@ -166,7 +169,10 @@ func TestLoadPkgInfo(t *testing.T) {
 		buffer["files"] = map[string][]map[string]interface{}{name: referenceFileList}
 		testFilePath, _ = test.GetTestFilePath(path.Join("temp", name+".yml"))
 		testFilePtr, _ = os.Create(testFilePath)
-		_ = yaml.NewEncoder(testFilePtr).Encode(buffer)
+		testEncoder = yaml.NewEncoder(testFilePtr)
+		_ = testEncoder.Encode(buffer)
+		_ = testEncoder.Close()
+		_ = testFilePtr.Close()
 
 		tested, err = LoadPkgInfo(testFilePath)
 		a.NoError(err)
