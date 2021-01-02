@@ -15,9 +15,7 @@ import (
 )
 
 const (
-	ExpectFile1    = "test.yml"
-	ExpectFile2    = "test-with-filepath.yml"
-	ExpectFileMode = uint(0644)
+	ExpectFile1 = "test.yml"
 
 	randStrMin = 5
 	randStrMax = 10
@@ -109,5 +107,16 @@ func LoadTestYAMLData(filepath string) (*YAMLTestData, error) {
 		} else {
 			return data, nil
 		}
+	}
+}
+
+func WaitUntilFileExist(file string) {
+	checker := func(file string) bool {
+		_, err := os.Stat(file)
+		return os.IsNotExist(err)
+	}
+
+	for checker(file) {
+		time.Sleep(time.Millisecond * 300)
 	}
 }
